@@ -3,100 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMK Mantin Platform</title>
+    <title>SMK Mantin 平台</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .video-card { height: 500px; background: #1a1a1a; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 15px; }
-        .nav-btn { flex: 1; text-align: center; padding: 12px; font-size: 12px; transition: 0.3s; }
-        .login-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; font-weight: bold; }
+        .tab-content { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
     <div id="root"></div>
     <script type="text/babel">
         const { useState } = React;
 
         function App() {
-            // 核心逻辑：isLoggedIn 决定显示登录页还是主页
             const [isLoggedIn, setIsLoggedIn] = useState(false);
             const [username, setUsername] = useState('');
-            const [lang, setLang] = useState('zh');
-            const [page, setPage] = useState('v');
-            const [dark, setDark] = useState(false);
+            // 默认打开先是“聊天室”
+            const [activeTab, setActiveTab] = useState('chat');
 
-            // 登录处理函数
+            // 登录函数
             const handleLogin = (e) => {
                 e.preventDefault();
-                if(username.trim() !== "") {
-                    setIsLoggedIn(true);
-                } else {
-                    alert("请输入名字！");
-                }
+                if(username.trim()) setIsLoggedIn(true);
             };
 
-            // --- 登录界面 ---
+            // 1. 登入界面
             if (!isLoggedIn) {
                 return (
-                    <div className="h-screen flex items-center justify-center login-bg p-6">
-                        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center">
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">SMK Mantin</h1>
-                            <p className="text-gray-500 mb-8">欢迎来到社交学习平台</p>
+                    <div className="h-screen flex items-center justify-center p-6 bg-gradient-to-br from-indigo-500 to-purple-600">
+                        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm">
+                            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">SMK Mantin 登入</h2>
                             <form onSubmit={handleLogin}>
                                 <input 
                                     type="text" 
-                                    placeholder="输入你的名字..." 
-                                    className="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-indigo-400"
-                                    value={username}
+                                    placeholder="请输入你的用户名" 
+                                    className="w-full p-4 border rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-indigo-400"
                                     onChange={(e) => setUsername(e.target.value)}
                                 />
-                                <button className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">
-                                    进入平台
-                                </button>
+                                <button className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold">进入平台</button>
                             </form>
-                            <p className="mt-6 text-xs text-gray-400">由 GitHub Pages 强力驱动</p>
                         </div>
                     </div>
                 );
             }
 
-            // --- 主界面 (你之前看到的界面) ---
+            // 2. 主界面 (包含手绘图里的6个按钮)
             return (
-                <div className={`max-w-md mx-auto h-screen flex flex-col ${dark ? 'bg-black text-white' : 'bg-gray-50 text-gray-800'}`}>
-                    {/* 顶部栏 */}
-                    <div className="flex items-center gap-2 p-3 bg-white shadow-sm sticky top-0 z-10">
-                        <input className="flex-1 p-2 bg-gray-100 rounded-xl text-sm" placeholder="搜索..." />
-                        <button onClick={() => setDark(!dark)} className="text-xl"> {dark ? '☀️' : '🌙'} </button>
-                        <select value={lang} onChange={(e)=>setLang(e.target.value)} className="text-xs border rounded-md p-1 bg-white">
-                            <option value="zh">中文</option>
-                            <option value="ms">Melayu</option>
-                            <option value="en">English</option>
-                        </select>
+                <div className="max-w-md mx-auto h-screen flex flex-col bg-white shadow-lg overflow-hidden">
+                    {/* 顶部标题 */}
+                    <div className="p-4 border-b flex justify-between items-center bg-white sticky top-0">
+                        <span className="font-bold text-indigo-600 text-lg">SMK Mantin</span>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">在线: {username}</span>
                     </div>
 
-                    {/* 内容区 */}
-                    <div className="flex-1 overflow-y-auto p-4">
-                        {page === 'v' && <div className="space-y-4"><div className="video-card">🎬 视频内容 1</div><div className="video-card">🎬 视频内容 2</div></div>}
-                        {page === 'c' && <div className="text-center text-gray-400 mt-20 font-bold text-xl">💬 聊天大群<br/><span className="text-sm font-normal">管理员已开启禁言</span></div>}
-                        {page === 's' && <div className="bg-white p-6 rounded-3xl shadow-lg text-center"><h2 className="font-bold text-lg mb-4">语音房 101</h2><button className="bg-indigo-600 text-white px-8 py-2 rounded-full">加入语音</button></div>}
-                        {page === 'm' && <div className="text-center mt-10"><div className="w-24 h-24 bg-indigo-100 rounded-full mx-auto mb-4 border-4 border-white shadow-md flex items-center justify-center text-3xl">👤</div><h3 className="font-bold text-xl text-indigo-600">{username}</h3><p className="text-gray-500">SMK Mantin 学生</p></div>}
+                    {/* 内容显示区 */}
+                    <div className="flex-1 overflow-y-auto p-4 tab-content bg-gray-50">
+                        {activeTab === 'chat' && <div><h2 className="font-bold text-xl mb-4">💬 聊天室</h2><div className="bg-white p-3 rounded-lg shadow-sm border mb-2">系统：欢迎来到公共大厅！</div></div>}
+                        {activeTab === 'study' && <div><h2 className="font-bold text-xl mb-4">📚 学习区</h2><p className="text-gray-500">这里是 5PSV1 的学习资源...</p></div>}
+                        {activeTab === 'video' && <div><h2 className="font-bold text-xl mb-4">🎬 视频内容</h2><div className="aspect-video bg-black rounded-xl flex items-center justify-center text-white text-sm">视频播放器预留位</div></div>}
+                        {activeTab === 'game' && <div><h2 className="font-bold text-xl mb-4">🎮 游戏区</h2><p className="text-gray-400">Minecraft 服务器状态：在线</p></div>}
+                        {activeTab === 'private' && <div><h2 className="font-bold text-xl mb-4">✉️ 私聊/群聊</h2><p className="text-gray-400">暂无新消息</p></div>}
+                        {activeTab === 'profile' && <div className="text-center mt-10"><div className="w-20 h-20 bg-indigo-100 rounded-full mx-auto mb-4 border-2 border-indigo-200 flex items-center justify-center text-2xl">👤</div><h3 className="font-bold text-xl">{username}</h3><p className="text-gray-500 text-sm">个人主页信息设置</p></div>}
                     </div>
 
-                    {/* 底部导航 */}
-                    <div className="flex justify-around bg-white border-t p-2 pb-6">
-                        <button onClick={()=>setPage('v')} className={`nav-btn ${page==='v'?'text-indigo-600 font-bold':''}`}><div>🎥</div>视频</button>
-                        <button onClick={()=>setPage('c')} className={`nav-btn ${page==='c'?'text-indigo-600 font-bold':''}`}><div>💬</div>聊天</button>
-                        <button onClick={()=>setPage('s')} className={`nav-btn ${page==='s'?'text-indigo-600 font-bold':''}`}><div>📞</div>语音</button>
-                        <button onClick={()=>setPage('m')} className={`nav-btn ${page==='m'?'text-indigo-600 font-bold':''}`}><div>👤</div>我的</button>
+                    {/* 底部导航栏 - 对应你的手绘6个功能 */}
+                    <div className="flex border-t bg-white pb-6 pt-2">
+                        <NavBtn id="chat" label="聊天室" icon="💬" current={activeTab} set={setActiveTab} />
+                        <NavBtn id="study" label="学习区" icon="📚" current={activeTab} set={setActiveTab} />
+                        <NavBtn id="video" label="视频" icon="🎬" current={activeTab} set={setActiveTab} />
+                        <NavBtn id="game" label="游戏" icon="🎮" current={activeTab} set={setActiveTab} />
+                        <NavBtn id="private" label="私聊" icon="✉️" current={activeTab} set={setActiveTab} />
+                        <NavBtn id="profile" label="个人" icon="👤" current={activeTab} set={setActiveTab} />
                     </div>
                 </div>
             );
         }
+
+        function NavBtn({ id, label, icon, current, set }) {
+            return (
+                <button onClick={() => set(id)} className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] ${current === id ? 'nav-active' : 'text-gray-400'}`}>
+                    <span className="text-base">{icon}</span>
+                    <span>{label}</span>
+                </button>
+            );
+        }
+
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
-
-
