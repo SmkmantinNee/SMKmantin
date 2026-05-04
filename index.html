@@ -2,92 +2,193 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMK Mantin 平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SMK Mantin 社交学习平台</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; font-weight: bold; }
-        .tab-content { animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        canvas { background: #111827; display: block; margin: 0 auto; border-radius: 12px; width: 100%; height: 280px; touch-action: none; }
+        .leaderboard-container { max-height: 180px; overflow-y: auto; }
     </style>
 </head>
 <body class="bg-gray-100">
     <div id="root"></div>
+
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect, useRef } = React;
 
+        // --- 1. 这里是你的 Supabase “钥匙” ---
+        const SUPABASE_URL = 'https://wifscfneerurafgyfbhv.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_eS9rcoiw9gL4J965J-FwRQ_bSXLY3eP';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- 2. 接球小游戏组件 ---
+        function CatchBallGame({ user, onGameOver }) {
+            const canvasRef = useRef(null);
+            const [score, setScore] = useState(0);
+            const [isDead, setIsDead] = useState(false);
+
+            useEffect(() => {
+                if (isDead) return;
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let animationId;
+
+                let paddleW = 80, paddleX = (canvas.width - paddleW) / 2;
+                let ballX = canvas.width / 2, ballY = 30, ballRadius = 8;
+                let speedX = 3, speedY = 3;
+
+                const movePaddle = (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                    paddleX = Math.max(0, Math.min(canvas.width - paddleW, x - paddleW / 2));
+                };
+                canvas.addEventListener('touchmove', movePaddle);
+
+                const update = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    // 画球
+                    ctx.beginPath(); ctx.arc(ballX, ballY, ballRadius, 0, Math.PI*2);
+                    ctx.fillStyle = "#818cf8"; ctx.fill(); ctx.closePath();
+                    // 画挡板
+                    ctx.fillStyle = "#ffffff"; ctx.fillRect(paddleX, canvas.height - 15, paddleW, 10);
+
+                    // 碰撞逻辑
+                    if (ballX + speedX > canvas.width - ballRadius || ballX + speedX < ballRadius) speedX = -speedX;
+                    if (ballY + speedY < ballRadius) speedY = -speedY;
+                    else if (ballY + speedY > canvas.height - ballRadius - 5) {
+                        if (ballX > paddleX && ballX < paddleX + paddleW) {
+                            speedY = -speedY;
+                            setScore(s => s + 1);
+                            speedX *= 1.05; speedY *= 1.05; // 越玩越快
+                        } else {
+                            setIsDead(true);
+                            onGameOver(score + 1); // 游戏结束，提交分数
+                        }
+                    }
+                    ballX += speedX; ballY += speedY;
+                    animationId = requestAnimationFrame(update);
+                };
+                update();
+                return () => { cancelAnimationFrame(animationId); canvas.removeEventListener('touchmove', movePaddle); };
+            }, [isDead]);
+
+            return (
+                <div className="bg-gray-800 p-4 rounded-3xl text-white shadow-inner">
+                    <div className="flex justify-between mb-2 font-bold"><span>当前分数: {score}</span></div>
+                    <canvas ref={canvasRef} width="300" height="280"></canvas>
+                    {isDead && (
+                        <div className="mt-4 text-center">
+                            <p className="text-red-400 mb-2 font-bold">掉进虚空了！</p>
+                            <button onClick={() => {setIsDead(false); setScore(0);}} className="bg-indigo-500 px-6 py-2 rounded-full font-bold">再来一局</button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // --- 3. 主程序 ---
         function App() {
-            const [isLoggedIn, setIsLoggedIn] = useState(false);
             const [username, setUsername] = useState('');
-            // 默认打开先是“聊天室”
-            const [activeTab, setActiveTab] = useState('chat');
+            const [isLogin, setIsLogin] = useState(false);
+            const [tab, setTab] = useState('chat'); // 默认进入聊天室
+            const [ranks, setRanks] = useState([]);
 
-            // 登录函数
-            const handleLogin = (e) => {
-                e.preventDefault();
-                if(username.trim()) setIsLoggedIn(true);
+            // 获取实时排行榜
+            const getRanks = async () => {
+                const { data } = await supabaseClient
+                    .from('ranks')
+                    .select('*')
+                    .order('score', { ascending: false })
+                    .limit(10); // 只显示前10名
+                if (data) setRanks(data);
             };
 
-            // 1. 登入界面
-            if (!isLoggedIn) {
+            useEffect(() => { getRanks(); }, []);
+
+            // 提交分数并刷新排行
+            const handleGameOver = async (finalScore) => {
+                await supabaseClient.from('ranks').upsert(
+                    { username: username, score: finalScore }, 
+                    { onConflict: 'username' }
+                );
+                getRanks(); 
+            };
+
+            if (!isLogin) {
                 return (
-                    <div className="h-screen flex items-center justify-center p-6 bg-gradient-to-br from-indigo-500 to-purple-600">
-                        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm">
-                            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">SMK Mantin 登入</h2>
-                            <form onSubmit={handleLogin}>
-                                <input 
-                                    type="text" 
-                                    placeholder="请输入你的用户名" 
-                                    className="w-full p-4 border rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-indigo-400"
-                                    onChange={(e) => setUsername(e.target.value)}
-                                />
-                                <button className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold">进入平台</button>
-                            </form>
+                    <div className="h-screen flex items-center justify-center bg-indigo-600 p-6">
+                        <div className="bg-white p-8 rounded-3xl w-full max-w-xs shadow-2xl">
+                            <h2 className="text-2xl font-bold text-center mb-6">SMK Mantin</h2>
+                            <input type="text" placeholder="输入你的名字" className="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none text-center" onChange={e => setUsername(e.target.value)} />
+                            <button onClick={() => username && setIsLogin(true)} className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold">进入校园平台</button>
                         </div>
                     </div>
                 );
             }
 
-            // 2. 主界面 (包含手绘图里的6个按钮)
             return (
-                <div className="max-w-md mx-auto h-screen flex flex-col bg-white shadow-lg overflow-hidden">
-                    {/* 顶部标题 */}
-                    <div className="p-4 border-b flex justify-between items-center bg-white sticky top-0">
-                        <span className="font-bold text-indigo-600 text-lg">SMK Mantin</span>
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">在线: {username}</span>
+                <div className="max-w-md mx-auto h-screen flex flex-col bg-white overflow-hidden shadow-2xl">
+                    {/* 顶部标题栏 */}
+                    <div className="p-4 border-b flex justify-between items-center bg-white">
+                        <span className="font-extrabold text-indigo-600 text-xl">SMK Mantin</span>
+                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-bold">在线: {username}</span>
                     </div>
 
-                    {/* 内容显示区 */}
-                    <div className="flex-1 overflow-y-auto p-4 tab-content bg-gray-50">
-                        {activeTab === 'chat' && <div><h2 className="font-bold text-xl mb-4">💬 聊天室</h2><div className="bg-white p-3 rounded-lg shadow-sm border mb-2">系统：欢迎来到公共大厅！</div></div>}
-                        {activeTab === 'study' && <div><h2 className="font-bold text-xl mb-4">📚 学习区</h2><p className="text-gray-500">这里是 5PSV1 的学习资源...</p></div>}
-                        {activeTab === 'video' && <div><h2 className="font-bold text-xl mb-4">🎬 视频内容</h2><div className="aspect-video bg-black rounded-xl flex items-center justify-center text-white text-sm">视频播放器预留位</div></div>}
-                        {activeTab === 'game' && <div><h2 className="font-bold text-xl mb-4">🎮 游戏区</h2><p className="text-gray-400">Minecraft 服务器状态：在线</p></div>}
-                        {activeTab === 'private' && <div><h2 className="font-bold text-xl mb-4">✉️ 私聊/群聊</h2><p className="text-gray-400">暂无新消息</p></div>}
-                        {activeTab === 'profile' && <div className="text-center mt-10"><div className="w-20 h-20 bg-indigo-100 rounded-full mx-auto mb-4 border-2 border-indigo-200 flex items-center justify-center text-2xl">👤</div><h3 className="font-bold text-xl">{username}</h3><p className="text-gray-500 text-sm">个人主页信息设置</p></div>}
+                    {/* 中间内容区 */}
+                    <div className="flex-1 overflow-y-auto bg-gray-50 p-4">
+                        {tab === 'chat' && (
+                            <div className="space-y-4">
+                                {/* 实时排行榜 */}
+                                <div className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100">
+                                    <h3 className="text-sm font-bold text-indigo-600 mb-3 flex items-center">🏆 实时接球榜</h3>
+                                    <div className="leaderboard-container text-xs space-y-2">
+                                        {ranks.map((r, i) => (
+                                            <div key={i} className={`flex justify-between items-center p-2 rounded-lg ${r.username === username ? 'bg-indigo-50 border-l-4 border-indigo-500' : ''}`}>
+                                                <span className="font-bold text-gray-400">#{i+1}</span>
+                                                <span className="flex-1 ml-4 font-medium">{r.username}</span>
+                                                <span className="font-bold text-indigo-600">{r.score}分</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-white p-6 rounded-2xl border border-dashed border-gray-200 text-center text-gray-400">
+                                    💬 聊天室功能开发中...
+                                </div>
+                            </div>
+                        )}
+
+                        {tab === 'game' && (
+                            <div className="space-y-4 text-center">
+                                <h2 className="text-xl font-bold text-gray-800">🎮 正在玩：接球</h2>
+                                <CatchBallGame user={username} onGameOver={handleGameOver} />
+                            </div>
+                        )}
+
+                        {tab === 'study' && <div className="p-4"><h2 className="text-xl font-bold mb-4">📚 学习资源</h2><p className="text-gray-500 text-sm">这里是 5PSV1 的专属学习资料库...</p></div>}
+                        {tab === 'profile' && <div className="text-center pt-10"><div className="w-20 h-20 bg-indigo-100 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-indigo-600">{username[0]}</div><h3 className="font-bold text-lg">{username}</h3><p className="text-gray-400 text-xs">SMK Mantin 学生</p></div>}
                     </div>
 
-                    {/* 底部导航栏 - 对应你的手绘6个功能 */}
-                    <div className="flex border-t bg-white pb-6 pt-2">
-                        <NavBtn id="chat" label="聊天室" icon="💬" current={activeTab} set={setActiveTab} />
-                        <NavBtn id="study" label="学习区" icon="📚" current={activeTab} set={setActiveTab} />
-                        <NavBtn id="video" label="视频" icon="🎬" current={activeTab} set={setActiveTab} />
-                        <NavBtn id="game" label="游戏" icon="🎮" current={activeTab} set={setActiveTab} />
-                        <NavBtn id="private" label="私聊" icon="✉️" current={activeTab} set={setActiveTab} />
-                        <NavBtn id="profile" label="个人" icon="👤" current={activeTab} set={setActiveTab} />
+                    {/* 底部导航栏 - 按照你的手画草图排列 */}
+                    <div className="flex border-t bg-white pb-6 pt-3 px-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+                        <NavBtn id="chat" label="聊天室" icon="💬" cur={tab} set={setTab} />
+                        <NavBtn id="study" label="学习区" icon="📚" cur={tab} set={setTab} />
+                        <NavBtn id="game" label="游戏" icon="🎮" cur={tab} set={setTab} />
+                        <NavBtn id="profile" label="个人" icon="👤" cur={tab} set={setTab} />
                     </div>
                 </div>
             );
         }
 
-        function NavBtn({ id, label, icon, current, set }) {
+        function NavBtn({ id, label, icon, cur, set }) {
             return (
-                <button onClick={() => set(id)} className={`flex-1 flex flex-col items-center gap-1 py-1 text-[10px] ${current === id ? 'nav-active' : 'text-gray-400'}`}>
-                    <span className="text-base">{icon}</span>
-                    <span>{label}</span>
+                <button onClick={() => set(id)} className={`flex-1 flex flex-col items-center gap-1 transition-all ${cur === id ? 'nav-active scale-110' : 'text-gray-300 opacity-60'}`}>
+                    <span className="text-xl">{icon}</span>
+                    <span className="text-[10px]">{label}</span>
                 </button>
             );
         }
@@ -96,3 +197,4 @@
     </script>
 </body>
 </html>
+
