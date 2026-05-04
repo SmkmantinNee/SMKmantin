@@ -11,46 +11,85 @@
     <style>
         .video-card { height: 500px; background: #1a1a1a; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 15px; }
         .nav-btn { flex: 1; text-align: center; padding: 12px; font-size: 12px; transition: 0.3s; }
+        .login-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
         const { useState } = React;
-        const dictionary = {
-            zh: { v: "视频区", c: "聊天", s: "语音", m: "我的", search: "搜索...", join: "进入房间" },
-            ms: { v: "Video", c: "Sembang", s: "Suara", m: "Profil", search: "Cari...", join: "Sertai" },
-            ta: { v: "வீடியோ", c: "அரட்டை", s: "குரல்", m: "சுயவிவரம்", search: "தேடல்...", join: "சேர" },
-            en: { v: "Videos", c: "Chat", s: "Voice", m: "Me", search: "Search...", join: "Join Room" }
-        };
+
         function App() {
+            // 核心逻辑：isLoggedIn 决定显示登录页还是主页
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [username, setUsername] = useState('');
             const [lang, setLang] = useState('zh');
             const [page, setPage] = useState('v');
             const [dark, setDark] = useState(false);
-            const t = (k) => dictionary[lang][k];
+
+            // 登录处理函数
+            const handleLogin = (e) => {
+                e.preventDefault();
+                if(username.trim() !== "") {
+                    setIsLoggedIn(true);
+                } else {
+                    alert("请输入名字！");
+                }
+            };
+
+            // --- 登录界面 ---
+            if (!isLoggedIn) {
+                return (
+                    <div className="h-screen flex items-center justify-center login-bg p-6">
+                        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">SMK Mantin</h1>
+                            <p className="text-gray-500 mb-8">欢迎来到社交学习平台</p>
+                            <form onSubmit={handleLogin}>
+                                <input 
+                                    type="text" 
+                                    placeholder="输入你的名字..." 
+                                    className="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-indigo-400"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                />
+                                <button className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">
+                                    进入平台
+                                </button>
+                            </form>
+                            <p className="mt-6 text-xs text-gray-400">由 GitHub Pages 强力驱动</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- 主界面 (你之前看到的界面) ---
             return (
                 <div className={`max-w-md mx-auto h-screen flex flex-col ${dark ? 'bg-black text-white' : 'bg-gray-50 text-gray-800'}`}>
+                    {/* 顶部栏 */}
                     <div className="flex items-center gap-2 p-3 bg-white shadow-sm sticky top-0 z-10">
-                        <input className="flex-1 p-2 bg-gray-100 rounded-xl text-sm" placeholder={t('search')} />
+                        <input className="flex-1 p-2 bg-gray-100 rounded-xl text-sm" placeholder="搜索..." />
                         <button onClick={() => setDark(!dark)} className="text-xl"> {dark ? '☀️' : '🌙'} </button>
                         <select value={lang} onChange={(e)=>setLang(e.target.value)} className="text-xs border rounded-md p-1 bg-white">
                             <option value="zh">中文</option>
                             <option value="ms">Melayu</option>
-                            <option value="ta">தமிழ்</option>
                             <option value="en">English</option>
                         </select>
                     </div>
+
+                    {/* 内容区 */}
                     <div className="flex-1 overflow-y-auto p-4">
-                        {page === 'v' && <div className="space-y-4"><div className="video-card">🎬 {t('v')} 1</div><div className="video-card">🎬 {t('v')} 2</div></div>}
-                        {page === 'c' && <div className="text-center text-gray-400 mt-20">{t('c')} 系统正在维护...</div>}
-                        {page === 's' && <div className="bg-white p-6 rounded-3xl shadow-lg text-center"><h2 className="font-bold text-lg mb-4">{t('s')} 101</h2><button className="bg-indigo-600 text-white px-8 py-2 rounded-full">{t('join')}</button></div>}
-                        {page === 'm' && <div className="text-center mt-10"><div className="w-24 h-24 bg-indigo-100 rounded-full mx-auto mb-4 border-4 border-white shadow-md"></div><h3 className="font-bold text-xl text-indigo-600">SMK Mantin 学生</h3><p className="text-gray-500">5PSV1 班级</p></div>}
+                        {page === 'v' && <div className="space-y-4"><div className="video-card">🎬 视频内容 1</div><div className="video-card">🎬 视频内容 2</div></div>}
+                        {page === 'c' && <div className="text-center text-gray-400 mt-20 font-bold text-xl">💬 聊天大群<br/><span className="text-sm font-normal">管理员已开启禁言</span></div>}
+                        {page === 's' && <div className="bg-white p-6 rounded-3xl shadow-lg text-center"><h2 className="font-bold text-lg mb-4">语音房 101</h2><button className="bg-indigo-600 text-white px-8 py-2 rounded-full">加入语音</button></div>}
+                        {page === 'm' && <div className="text-center mt-10"><div className="w-24 h-24 bg-indigo-100 rounded-full mx-auto mb-4 border-4 border-white shadow-md flex items-center justify-center text-3xl">👤</div><h3 className="font-bold text-xl text-indigo-600">{username}</h3><p className="text-gray-500">SMK Mantin 学生</p></div>}
                     </div>
+
+                    {/* 底部导航 */}
                     <div className="flex justify-around bg-white border-t p-2 pb-6">
-                        <button onClick={()=>setPage('v')} className={`nav-btn ${page==='v'?'text-indigo-600 font-bold':''}`}><div>🎥</div>{t('v')}</button>
-                        <button onClick={()=>setPage('c')} className={`nav-btn ${page==='c'?'text-indigo-600 font-bold':''}`}><div>💬</div>{t('c')}</button>
-                        <button onClick={()=>setPage('s')} className={`nav-btn ${page==='s'?'text-indigo-600 font-bold':''}`}><div>📞</div>{t('s')}</button>
-                        <button onClick={()=>setPage('m')} className={`nav-btn ${page==='m'?'text-indigo-600 font-bold':''}`}><div>👤</div>{t('m')}</button>
+                        <button onClick={()=>setPage('v')} className={`nav-btn ${page==='v'?'text-indigo-600 font-bold':''}`}><div>🎥</div>视频</button>
+                        <button onClick={()=>setPage('c')} className={`nav-btn ${page==='c'?'text-indigo-600 font-bold':''}`}><div>💬</div>聊天</button>
+                        <button onClick={()=>setPage('s')} className={`nav-btn ${page==='s'?'text-indigo-600 font-bold':''}`}><div>📞</div>语音</button>
+                        <button onClick={()=>setPage('m')} className={`nav-btn ${page==='m'?'text-indigo-600 font-bold':''}`}><div>👤</div>我的</button>
                     </div>
                 </div>
             );
