@@ -1,200 +1,187 @@
-<!DOCTYPE html>
+                                                                <h3 className="text-sm font-bold text-indigo-600 mb-3 flex items-center">🏆 实时接球榜</h3>
+                                    <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SMK Mantin 社交学习平台</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMK Mantin - 创世管理系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; font-weight: bold; }
-        canvas { background: #111827; display: block; margin: 0 auto; border-radius: 12px; width: 100%; height: 280px; touch-action: none; }
-        .leaderboard-container { max-height: 180px; overflow-y: auto; }
+        :root {
+            --bg-color: #0d0118;
+            --primary-purple: #7d3cf2;
+            --god-gold: #ffd700;
+            --error-red: #ff4d4d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans SC', sans-serif; }
+        body { background-color: var(--bg-color); color: white; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+
+        .phone-container { width: 100%; max-width: 450px; display: flex; flex-direction: column; position: relative; border: 1px solid #333; background: #000; }
+
+        /* 创世模式顶部提示 */
+        #creatorHeader { background: var(--god-gold); color: black; text-align: center; font-size: 12px; padding: 5px; font-weight: bold; display: none; }
+
+        .top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); }
+        .logo { font-weight: bold; font-size: 20px; cursor: pointer; color: var(--primary-purple); }
+
+        /* 列表区域 */
+        .chat-list { flex: 1; padding: 15px; overflow-y: auto; }
+        .user-card { 
+            display: flex; align-items: center; background: #161616; 
+            margin-bottom: 12px; padding: 15px; border-radius: 12px; 
+            cursor: pointer; border: 1px solid #222;
+        }
+        
+        .avatar { width: 45px; height: 45px; background: #333; border-radius: 50%; margin-right: 15px; transition: 0.3s; }
+        
+        /* 神管理头像特效 */
+        .god-effect { border: 2px solid var(--god-gold); box-shadow: 0 0 15px var(--primary-purple); animation: breathe 2s infinite; }
+        @keyframes breathe { 0% { opacity: 0.8; } 50% { opacity: 1; box-shadow: 0 0 20px var(--god-gold); } 100% { opacity: 0.8; } }
+
+        .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; }
+        .badge-god { background: var(--god-gold); color: black; }
+
+        /* 管理面板 */
+        .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; }
+        .admin-modal { 
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: #1a1a1a; border: 1px solid #333; padding: 25px; border-radius: 20px; z-index: 101; width: 85%;
+        }
+        .action-btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+
+        /* 底部导航 */
+        .nav-bar { display: grid; grid-template-columns: repeat(6, 1fr); background: #0a0a0a; padding: 12px 0; border-top: 1px solid #222; }
+        .nav-item { text-align: center; font-size: 10px; color: #555; }
+        .active { color: var(--primary-purple); font-weight: bold; }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div id="root"></div>
+<body>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+<div class="phone-container">
+    <div id="creatorHeader">MASTER CONTROL ACTIVATED</div>
 
-        // --- 1. 这里是你的 Supabase “钥匙” ---
-        const SUPABASE_URL = 'https://wifscfneerurafgyfbhv.supabase.co'; 
-        const SUPABASE_KEY = 'sb_publishable_eS9rcoiw9gL4J965J-FwRQ_bSXLY3eP';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div class="top-bar">
+        <span class="logo" onclick="checkMasterKey()">SMK <span style="color:#00e5ff">mantin</span></span>
+        <select id="langSelect" onchange="updateLang()" style="background:#222; color:white; border:none; padding:5px; border-radius:10px;">
+            <option value="zh">中文</option>
+            <option value="ms">Melayu</option>
+            <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+        </select>
+    </div>
 
-        // --- 2. 接球小游戏组件 ---
-        function CatchBallGame({ user, onGameOver }) {
-            const canvasRef = useRef(null);
-            const [score, setScore] = useState(0);
-            const [isDead, setIsDead] = useState(false);
+    <div style="text-align:center; padding:15px;"><h2 id="txt-title" style="border: 1px dashed #444; display:inline-block; padding:5px 20px; border-radius:15px; font-size:18px;">聊天室</h2></div>
 
-            useEffect(() => {
-                if (isDead) return;
-                const canvas = canvasRef.current;
-                const ctx = canvas.getContext('2d');
-                let animationId;
+    <div class="chat-list" id="userList"></div>
 
-                let paddleW = 80, paddleX = (canvas.width - paddleW) / 2;
-                let ballX = canvas.width / 2, ballY = 30, ballRadius = 8;
-                let speedX = 3, speedY = 3;
+    <nav class="nav-bar">
+        <div class="nav-item active" id="nav1">聊天室</div>
+        <div class="nav-item" id="nav2">学习区</div>
+        <div class="nav-item" id="nav3">视频</div>
+        <div class="nav-item" id="nav4">游戏</div>
+        <div class="nav-item" id="nav5">私/群</div>
+        <div class="nav-item" id="nav6">个人</div>
+    </nav>
 
-                const movePaddle = (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                    paddleX = Math.max(0, Math.min(canvas.width - paddleW, x - paddleW / 2));
-                };
-                canvas.addEventListener('touchmove', movePaddle);
+    <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="admin-modal" id="adminModal">
+        <h3 id="targetName" style="text-align:center; margin-bottom:20px;">用户管理</h3>
+        <button class="action-btn" style="background:#000; color:var(--god-gold); border:1px solid #444;">🛡️ <span id="btn-spy">监控私信记录</span></button>
+        <button id="toggleBtn" class="action-btn" onclick="handleToggle()"></button>
+        <button class="action-btn" style="background:var(--error-red); color:white;" onclick="handleBan()" id="btn-ban">永久封禁</button>
+        <button class="action-btn" style="background:#333; color:white;" onclick="closeModal()" id="btn-back">返回</button>
+    </div>
+</div>
 
-                const update = () => {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    // 画球
-                    ctx.beginPath(); ctx.arc(ballX, ballY, ballRadius, 0, Math.PI*2);
-                    ctx.fillStyle = "#818cf8"; ctx.fill(); ctx.closePath();
-                    // 画挡板
-                    ctx.fillStyle = "#ffffff"; ctx.fillRect(paddleX, canvas.height - 15, paddleW, 10);
+<script>
+    const MY_KEY = "nzl122909"; // 你的新密码
+    let isMaster = false;
+    let selectedIdx = null;
 
-                    // 碰撞逻辑
-                    if (ballX + speedX > canvas.width - ballRadius || ballX + speedX < ballRadius) speedX = -speedX;
-                    if (ballY + speedY < ballRadius) speedY = -speedY;
-                    else if (ballY + speedY > canvas.height - ballRadius - 5) {
-                        if (ballX > paddleX && ballX < paddleX + paddleW) {
-                            speedY = -speedY;
-                            setScore(s => s + 1);
-                            speedX *= 1.05; speedY *= 1.05; // 越玩越快
-                        } else {
-                            setIsDead(true);
-                            onGameOver(score + 1); // 游戏结束，提交分数
-                        }
-                    }
-                    ballX += speedX; ballY += speedY;
-                    animationId = requestAnimationFrame(update);
-                };
-                update();
-                return () => { cancelAnimationFrame(animationId); canvas.removeEventListener('touchmove', movePaddle); };
-            }, [isDead]);
+    let users = [
+        { name: "超级管理员 (你)", isGod: true, id: "001" },
+        { name: "Student_Mantin_A", isGod: false, id: "882" },
+        { name: "Student_Mantin_B", isGod: false, id: "774" }
+    ];
 
-            return (
-                <div className="bg-gray-800 p-4 rounded-3xl text-white shadow-inner">
-                    <div className="flex justify-between mb-2 font-bold"><span>当前分数: {score}</span></div>
-                    <canvas ref={canvasRef} width="300" height="280"></canvas>
-                    {isDead && (
-                        <div className="mt-4 text-center">
-                            <p className="text-red-400 mb-2 font-bold">掉进虚空了！</p>
-                            <button onClick={() => {setIsDead(false); setScore(0);}} className="bg-indigo-500 px-6 py-2 rounded-full font-bold">再来一局</button>
-                        </div>
-                    )}
+    const langMap = {
+        zh: { title:"聊天室", admin:"神管理员", promote:"赋予神管理权限", demote:"取消神管理权限", spy:"监控私信记录", ban:"永久封禁", back:"返回", nav:["聊天室","学习区","视频","游戏","私/群","个人"] },
+        ms: { title:"Bilik Sembang", admin:"God Admin", promote:"Beri Kuasa God Admin", demote:"Tarik Balik Kuasa", spy:"Pantau Mesej", ban:"Ban Selamanya", back:"Kembali", nav:["Sembang","Belajar","Video","Game","Privat","Profil"] },
+        en: { title:"Chat Room", admin:"God Admin", promote:"Grant God Admin", demote:"Revoke Admin Status", spy:"Monitor Messages", ban:"Permanent Ban", back:"Back", nav:["Chat","Study","Video","Game","Group","Profile"] },
+        ta: { title:"அரட்டை அறை", admin:"நிர்வாகி", promote:"அதிகாரம் வழங்கு", demote:"அதிகாரத்தை நீக்கு", spy:"செய்திகளைப் பார்", ban:"தடை செய்", back:"திரும்பிச் செல்", nav:["அரட்டை","படிப்பு","வீடியோ","ஆட்டம்","குழு","சுயவிவரம்"] }
+    };
+
+    function updateLang() {
+        const l = langMap[document.getElementById('langSelect').value];
+        document.getElementById('txt-title').innerText = l.title;
+        document.getElementById('btn-spy').innerText = l.spy;
+        document.getElementById('btn-ban').innerText = l.ban;
+        document.getElementById('btn-back').innerText = l.back;
+        for(let i=1; i<=6; i++) document.getElementById('nav'+i).innerText = l.nav[i-1];
+        render();
+    }
+
+    function render() {
+        const list = document.getElementById('userList');
+        const l = langMap[document.getElementById('langSelect').value];
+        list.innerHTML = '';
+        users.forEach((u, i) => {
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            card.onclick = () => openAdmin(i);
+            card.innerHTML = `
+                <div class="avatar ${u.isGod ? 'god-effect' : ''}"></div>
+                <div>
+                    <strong>${u.name}</strong> ${u.isGod ? `<span class="badge badge-god">${l.admin}</span>` : ''}
+                    <p style="font-size:12px; color:#555;">UID: ${u.id}</p>
                 </div>
-            );
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function checkMasterKey() {
+        if(prompt("请输入创世密码：") === MY_KEY) {
+            isMaster = true;
+            document.getElementById('creatorHeader').style.display = 'block';
+            alert("身份验证成功，欢迎主人！");
         }
+    }
 
-        // --- 3. 主程序 ---
-        function App() {
-            const [username, setUsername] = useState('');
-            const [isLogin, setIsLogin] = useState(false);
-            const [tab, setTab] = useState('chat'); // 默认进入聊天室
-            const [ranks, setRanks] = useState([]);
+    function openAdmin(i) {
+        if(!isMaster) return alert("普通用户无权操作。");
+        selectedIdx = i;
+        const u = users[i];
+        const l = langMap[document.getElementById('langSelect').value];
+        document.getElementById('targetName').innerText = u.name;
+        const tBtn = document.getElementById('toggleBtn');
+        tBtn.innerText = u.isGod ? l.demote : l.promote;
+        tBtn.style.background = u.isGod ? "#ff8800" : "#00d4ff";
+        document.getElementById('adminModal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
 
-            // 获取实时排行榜
-            const getRanks = async () => {
-                const { data } = await supabaseClient
-                    .from('ranks')
-                    .select('*')
-                    .order('score', { ascending: false })
-                    .limit(10); // 只显示前10名
-                if (data) setRanks(data);
-            };
+    function handleToggle() {
+        users[selectedIdx].isGod = !users[selectedIdx].isGod;
+        render();
+        closeModal();
+    }
 
-            useEffect(() => { getRanks(); }, []);
-
-            // 提交分数并刷新排行
-            const handleGameOver = async (finalScore) => {
-                await supabaseClient.from('ranks').upsert(
-                    { username: username, score: finalScore }, 
-                    { onConflict: 'username' }
-                );
-                getRanks(); 
-            };
-
-            if (!isLogin) {
-                return (
-                    <div className="h-screen flex items-center justify-center bg-indigo-600 p-6">
-                        <div className="bg-white p-8 rounded-3xl w-full max-w-xs shadow-2xl">
-                            <h2 className="text-2xl font-bold text-center mb-6">SMK Mantin</h2>
-                            <input type="text" placeholder="输入你的名字" className="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none text-center" onChange={e => setUsername(e.target.value)} />
-                            <button onClick={() => username && setIsLogin(true)} className="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold">进入校园平台</button>
-                        </div>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="max-w-md mx-auto h-screen flex flex-col bg-white overflow-hidden shadow-2xl">
-                    {/* 顶部标题栏 */}
-                    <div className="p-4 border-b flex justify-between items-center bg-white">
-                        <span className="font-extrabold text-indigo-600 text-xl">SMK Mantin</span>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-bold">在线: {username}</span>
-                    </div>
-
-                    {/* 中间内容区 */}
-                    <div className="flex-1 overflow-y-auto bg-gray-50 p-4">
-                        {tab === 'chat' && (
-                            <div className="space-y-4">
-                                {/* 实时排行榜 */}
-                                <div className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100">
-                                    <h3 className="text-sm font-bold text-indigo-600 mb-3 flex items-center">🏆 实时接球榜</h3>
-                                    <div className="leaderboard-container text-xs space-y-2">
-                                        {ranks.map((r, i) => (
-                                            <div key={i} className={`flex justify-between items-center p-2 rounded-lg ${r.username === username ? 'bg-indigo-50 border-l-4 border-indigo-500' : ''}`}>
-                                                <span className="font-bold text-gray-400">#{i+1}</span>
-                                                <span className="flex-1 ml-4 font-medium">{r.username}</span>
-                                                <span className="font-bold text-indigo-600">{r.score}分</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="bg-white p-6 rounded-2xl border border-dashed border-gray-200 text-center text-gray-400">
-                                    💬 聊天室功能开发中...
-                                </div>
-                            </div>
-                        )}
-
-                        {tab === 'game' && (
-                            <div className="space-y-4 text-center">
-                                <h2 className="text-xl font-bold text-gray-800">🎮 正在玩：接球</h2>
-                                <CatchBallGame user={username} onGameOver={handleGameOver} />
-                            </div>
-                        )}
-
-                        {tab === 'study' && <div className="p-4"><h2 className="text-xl font-bold mb-4">📚 学习资源</h2><p className="text-gray-500 text-sm">这里是 5PSV1 的专属学习资料库...</p></div>}
-                        {tab === 'profile' && <div className="text-center pt-10"><div className="w-20 h-20 bg-indigo-100 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-indigo-600">{username[0]}</div><h3 className="font-bold text-lg">{username}</h3><p className="text-gray-400 text-xs">SMK Mantin 学生</p></div>}
-                    </div>
-
-                    {/* 底部导航栏 - 按照你的手画草图排列 */}
-                    <div className="flex border-t bg-white pb-6 pt-3 px-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-                        <NavBtn id="chat" label="聊天室" icon="💬" cur={tab} set={setTab} />
-                        <NavBtn id="study" label="学习区" icon="📚" cur={tab} set={setTab} />
-                        <NavBtn id="game" label="游戏" icon="🎮" cur={tab} set={setTab} />
-                        <NavBtn id="profile" label="个人" icon="👤" cur={tab} set={setTab} />
-                    </div>
-                </div>
-            );
+    function handleBan() {
+        if(confirm("确定封锁该学生？")) {
+            users.splice(selectedIdx, 1);
+            render();
+            closeModal();
         }
+    }
 
-        function NavBtn({ id, label, icon, cur, set }) {
-            return (
-                <button onClick={() => set(id)} className={`flex-1 flex flex-col items-center gap-1 transition-all ${cur === id ? 'nav-active scale-110' : 'text-gray-300 opacity-60'}`}>
-                    <span className="text-xl">{icon}</span>
-                    <span className="text-[10px]">{label}</span>
-                </button>
-            );
-        }
+    function closeModal() {
+        document.getElementById('adminModal').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
+    updateLang();
+</script>
 </body>
 </html>
-
