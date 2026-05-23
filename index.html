@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMKmantin 注册</title>
+<title>SMKmantin 登录</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -48,7 +49,6 @@ body{
     padding:8px;
     border-radius:10px;
     border:1px solid #ccc;
-    cursor:pointer;
 }
 
 .logo{
@@ -73,8 +73,8 @@ body{
 .input-group label{
     display:block;
     margin-bottom:8px;
-    color:#333;
     font-weight:bold;
+    color:#333;
 }
 
 .input-group input{
@@ -91,15 +91,22 @@ body{
     padding:15px;
     border:none;
     border-radius:15px;
-    background:#111827;
-    color:white;
     font-size:18px;
-    margin-top:10px;
     cursor:pointer;
+    margin-top:10px;
 }
 
-.btn:hover{
+.login-btn{
+    background:#111827;
+    color:white;
+}
+
+.login-btn:hover{
     background:#374151;
+}
+
+.register-btn{
+    background:#e5e7eb;
 }
 
 .footer{
@@ -108,6 +115,7 @@ body{
     color:#888;
     font-size:13px;
 }
+
 </style>
 </head>
 
@@ -115,154 +123,147 @@ body{
 
 <div class="container">
 
-    <div class="setting">⚙️</div>
+<div class="setting">⚙️</div>
 
-    <div class="top-bar">
-        <select class="language-select" onchange="changeLanguage(this.value)">
-            <option value="zh">中文</option>
-            <option value="ms">Bahasa Melayu</option>
-            <option value="ta">தமிழ்</option>
-            <option value="en">English</option>
-        </select>
-    </div>
+<div class="top-bar">
+<select class="language-select" onchange="changeLanguage(this.value)">
+<option value="zh">中文</option>
+<option value="ms">Bahasa Melayu</option>
+<option value="ta">தமிழ்</option>
+<option value="en">English</option>
+</select>
+</div>
 
-    <div class="logo">
-        <h1>SMKmantin</h1>
-        <p id="titleText">账号注册</p>
-    </div>
+<div class="logo">
+<h1>SMKmantin</h1>
+<p id="welcomeText">
+欢迎回来
+</p>
+</div>
 
-    <div class="input-group">
-        <label id="accountLabel">账号:</label>
-        <input type="text" id="accountInput" placeholder="不用学校的都可以">
-    </div>
+<form id="loginForm">
 
-    <div class="input-group">
-        <label id="nicknameLabel">显示名称（昵称）:</label>
-        <input type="text" id="nicknameInput" placeholder="进入社区显示的名字">
-    </div>
+<div class="input-group">
+<label id="accountLabel">账号:</label>
+<input
+type="text"
+id="accountInput"
+placeholder="请输入账号"
+required>
+</div>
 
-    <div class="input-group">
-        <label id="nameLabel">真实姓名:</label>
-        <input type="text" id="nameInput" placeholder="输入你的真实姓名">
-    </div>
+<div class="input-group">
+<label id="passwordLabel">密码:</label>
+<input
+type="password"
+id="passwordInput"
+placeholder="请输入密码"
+required>
+</div>
 
-    <div class="input-group">
-        <label id="classLabel">班级:</label>
-        <input type="text" id="classInput" placeholder="例如 4 Amanah">
-    </div>
+<button
+type="submit"
+class="btn login-btn"
+id="loginBtn">
+登录
+</button>
 
-    <div class="input-group">
-        <label id="birthdayLabel">生日日期:</label>
-        <input type="date" id="birthdayInput">
-    </div>
+<button
+type="button"
+class="btn register-btn"
+id="registerBtn"
+onclick="location.href='register.html'">
+注册新账号
+</button>
 
-    <div class="input-group">
-        <label id="phoneLabel">电话号码:</label>
-        <input type="tel" id="phoneInput" placeholder="输入电话号码">
-    </div>
+</form>
 
-    <button class="btn" id="registerBtn">
-        注册
-    </button>
-
-    <div class="footer">
-        SMKmantin © 2026
-    </div>
+<div class="footer">
+SMKmantin © 2026
+</div>
 
 </div>
 
 <script>
 
+document.getElementById("loginForm")
+.addEventListener("submit", function(event){
+
+event.preventDefault();
+
+alert("登录成功！");
+
+window.location.href = "home.html";
+
+});
+
 const translations = {
 
 zh:{
-title:"账号注册",
+welcome:"欢迎回来",
 account:"账号:",
-accountPlaceholder:"不用学校的都可以",
-nickname:"显示名称（昵称）:",
-nicknamePlaceholder:"进入社区显示的名字",
-name:"真实姓名:",
-namePlaceholder:"输入你的真实姓名",
-class:"班级:",
-classPlaceholder:"例如 4 Amanah",
-birthday:"生日日期:",
-phone:"电话号码:",
-phonePlaceholder:"输入电话号码",
-register:"注册"
+accountPlaceholder:"请输入账号",
+password:"密码:",
+passwordPlaceholder:"请输入密码",
+login:"登录",
+register:"注册新账号"
 },
 
 ms:{
-title:"Pendaftaran Akaun",
+welcome:"Selamat Datang Kembali",
 account:"Akaun:",
-accountPlaceholder:"Boleh guna apa-apa akaun",
-nickname:"Nama Paparan:",
-nicknamePlaceholder:"Nama yang dipaparkan dalam komuniti",
-name:"Nama Sebenar:",
-namePlaceholder:"Masukkan nama sebenar",
-class:"Kelas:",
-classPlaceholder:"Contoh 4 Amanah",
-birthday:"Tarikh Lahir:",
-phone:"Nombor Telefon:",
-phonePlaceholder:"Masukkan nombor telefon",
-register:"Daftar"
+accountPlaceholder:"Masukkan akaun",
+password:"Kata Laluan:",
+passwordPlaceholder:"Masukkan kata laluan",
+login:"Log Masuk",
+register:"Daftar Akaun Baru"
 },
 
 ta:{
-title:"கணக்கு பதிவு",
+welcome:"மீண்டும் வரவேற்கிறோம்",
 account:"கணக்கு:",
-accountPlaceholder:"எந்த கணக்கையும் பயன்படுத்தலாம்",
-nickname:"காட்டப்படும் பெயர்:",
-nicknamePlaceholder:"சமூகத்தில் காட்டப்படும் பெயர்",
-name:"உண்மையான பெயர்:",
-namePlaceholder:"உங்கள் உண்மையான பெயரை உள்ளிடவும்",
-class:"வகுப்பு:",
-classPlaceholder:"உதாரணம் 4 Amanah",
-birthday:"பிறந்த தேதி:",
-phone:"தொலைபேசி எண்:",
-phonePlaceholder:"தொலைபேசி எண்ணை உள்ளிடவும்",
-register:"பதிவு"
+accountPlaceholder:"கணக்கை உள்ளிடவும்",
+password:"கடவுச்சொல்:",
+passwordPlaceholder:"கடவுச்சொல்லை உள்ளிடவும்",
+login:"உள்நுழை",
+register:"புதிய கணக்கு பதிவு"
 },
 
 en:{
-title:"Account Registration",
+welcome:"Welcome Back",
 account:"Account:",
-accountPlaceholder:"Any account can be used",
-nickname:"Display Name:",
-nicknamePlaceholder:"Name shown in community",
-name:"Real Name:",
-namePlaceholder:"Enter your real name",
-class:"Class:",
-classPlaceholder:"Example 4 Amanah",
-birthday:"Birth Date:",
-phone:"Phone Number:",
-phonePlaceholder:"Enter phone number",
-register:"Register"
+accountPlaceholder:"Enter account",
+password:"Password:",
+passwordPlaceholder:"Enter password",
+login:"Login",
+register:"Create New Account"
 }
 
 };
 
 function changeLanguage(lang){
 
-document.getElementById("titleText").innerText = translations[lang].title;
+document.getElementById("welcomeText").innerText =
+translations[lang].welcome;
 
-document.getElementById("accountLabel").innerText = translations[lang].account;
-document.getElementById("accountInput").placeholder = translations[lang].accountPlaceholder;
+document.getElementById("accountLabel").innerText =
+translations[lang].account;
 
-document.getElementById("nicknameLabel").innerText = translations[lang].nickname;
-document.getElementById("nicknameInput").placeholder = translations[lang].nicknamePlaceholder;
+document.getElementById("accountInput").placeholder =
+translations[lang].accountPlaceholder;
 
-document.getElementById("nameLabel").innerText = translations[lang].name;
-document.getElementById("nameInput").placeholder = translations[lang].namePlaceholder;
+document.getElementById("passwordLabel").innerText =
+translations[lang].password;
 
-document.getElementById("classLabel").innerText = translations[lang].class;
-document.getElementById("classInput").placeholder = translations[lang].classPlaceholder;
+document.getElementById("passwordInput").placeholder =
+translations[lang].passwordPlaceholder;
 
-document.getElementById("birthdayLabel").innerText = translations[lang].birthday;
+document.getElementById("loginBtn").innerText =
+translations[lang].login;
 
-document.getElementById("phoneLabel").innerText = translations[lang].phone;
-document.getElementById("phoneInput").placeholder = translations[lang].phonePlaceholder;
+document.getElementById("registerBtn").innerText =
+translations[lang].register;
 
-document.getElementById("registerBtn").innerText = translations[lang].register;
 }
 
 </script>
