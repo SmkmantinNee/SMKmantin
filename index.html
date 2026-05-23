@@ -6,7 +6,6 @@
 <title>SMKmantin 注册</title>
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -65,7 +64,6 @@ body{
 .logo p{
     color:#666;
     margin-top:8px;
-    line-height:24px;
 }
 
 .input-group{
@@ -88,12 +86,6 @@ body{
     font-size:15px;
 }
 
-.note{
-    font-size:13px;
-    color:#777;
-    margin-top:5px;
-}
-
 .btn{
     width:100%;
     padding:15px;
@@ -104,7 +96,6 @@ body{
     font-size:18px;
     margin-top:10px;
     cursor:pointer;
-    transition:0.3s;
 }
 
 .btn:hover{
@@ -117,7 +108,6 @@ body{
     color:#888;
     font-size:13px;
 }
-
 </style>
 </head>
 
@@ -147,8 +137,13 @@ body{
     </div>
 
     <div class="input-group">
-        <label id="nameLabel">姓名:</label>
-        <input type="text" id="nameInput" placeholder="输入你的名字">
+        <label id="nicknameLabel">显示名称（昵称）:</label>
+        <input type="text" id="nicknameInput" placeholder="进入社区显示的名字">
+    </div>
+
+    <div class="input-group">
+        <label id="nameLabel">真实姓名:</label>
+        <input type="text" id="nameInput" placeholder="输入你的真实姓名">
     </div>
 
     <div class="input-group">
@@ -159,14 +154,6 @@ body{
     <div class="input-group">
         <label id="birthdayLabel">生日日期:</label>
         <input type="date" id="birthdayInput">
-    </div>
-
-    <div class="input-group">
-        <label id="idLabel">进入SMK的具体身份号码:</label>
-        <input type="text" id="idInput" placeholder="例如 SMK12345">
-        <div class="note" id="idNote">
-            （从老师那里获得）
-        </div>
     </div>
 
     <div class="input-group">
@@ -188,119 +175,94 @@ body{
 
 const translations = {
 
-    zh:{
-        title:"账号注册",
-        account:"账号:",
-        accountPlaceholder:"不用学校的都可以",
-        name:"姓名:",
-        namePlaceholder:"输入你的名字",
-        class:"班级:",
-        classPlaceholder:"例如 4 Amanah",
-        birthday:"生日日期:",
-        id:"进入SMK的具体身份号码:",
-        idPlaceholder:"例如 SMK12345",
-        note:"（从老师那里获得）",
-        phone:"电话号码:",
-        phonePlaceholder:"输入电话号码",
-        register:"注册"
-    },
+zh:{
+title:"账号注册",
+account:"账号:",
+accountPlaceholder:"不用学校的都可以",
+nickname:"显示名称（昵称）:",
+nicknamePlaceholder:"进入社区显示的名字",
+name:"真实姓名:",
+namePlaceholder:"输入你的真实姓名",
+class:"班级:",
+classPlaceholder:"例如 4 Amanah",
+birthday:"生日日期:",
+phone:"电话号码:",
+phonePlaceholder:"输入电话号码",
+register:"注册"
+},
 
-    ms:{
-        title:"Pendaftaran Akaun",
-        account:"Akaun:",
-        accountPlaceholder:"Boleh guna akaun apa sahaja",
-        name:"Nama:",
-        namePlaceholder:"Masukkan nama anda",
-        class:"Kelas:",
-        classPlaceholder:"Contoh 4 Amanah",
-        birthday:"Tarikh Lahir:",
-        id:"Nombor identiti masuk SMK:",
-        idPlaceholder:"Contoh SMK12345",
-        note:"(Dapat daripada guru)",
-        phone:"Nombor Telefon:",
-        phonePlaceholder:"Masukkan nombor telefon",
-        register:"Daftar"
-    },
+ms:{
+title:"Pendaftaran Akaun",
+account:"Akaun:",
+accountPlaceholder:"Boleh guna apa-apa akaun",
+nickname:"Nama Paparan:",
+nicknamePlaceholder:"Nama yang dipaparkan dalam komuniti",
+name:"Nama Sebenar:",
+namePlaceholder:"Masukkan nama sebenar",
+class:"Kelas:",
+classPlaceholder:"Contoh 4 Amanah",
+birthday:"Tarikh Lahir:",
+phone:"Nombor Telefon:",
+phonePlaceholder:"Masukkan nombor telefon",
+register:"Daftar"
+},
 
-    ta:{
-        title:"கணக்கு பதிவு",
-        account:"கணக்கு:",
-        accountPlaceholder:"எந்த கணக்கையும் பயன்படுத்தலாம்",
-        name:"பெயர்:",
-        namePlaceholder:"உங்கள் பெயரை உள்ளிடவும்",
-        class:"வகுப்பு:",
-        classPlaceholder:"உதாரணம் 4 Amanah",
-        birthday:"பிறந்த தேதி:",
-        id:"SMK அடையாள எண்:",
-        idPlaceholder:"உதாரணம் SMK12345",
-        note:"(ஆசிரியரிடமிருந்து பெறவும்)",
-        phone:"தொலைபேசி எண்:",
-        phonePlaceholder:"தொலைபேசி எண்ணை உள்ளிடவும்",
-        register:"பதிவு"
-    },
+ta:{
+title:"கணக்கு பதிவு",
+account:"கணக்கு:",
+accountPlaceholder:"எந்த கணக்கையும் பயன்படுத்தலாம்",
+nickname:"காட்டப்படும் பெயர்:",
+nicknamePlaceholder:"சமூகத்தில் காட்டப்படும் பெயர்",
+name:"உண்மையான பெயர்:",
+namePlaceholder:"உங்கள் உண்மையான பெயரை உள்ளிடவும்",
+class:"வகுப்பு:",
+classPlaceholder:"உதாரணம் 4 Amanah",
+birthday:"பிறந்த தேதி:",
+phone:"தொலைபேசி எண்:",
+phonePlaceholder:"தொலைபேசி எண்ணை உள்ளிடவும்",
+register:"பதிவு"
+},
 
-    en:{
-        title:"Account Registration",
-        account:"Account:",
-        accountPlaceholder:"Any account can be used",
-        name:"Name:",
-        namePlaceholder:"Enter your name",
-        class:"Class:",
-        classPlaceholder:"Example 4 Amanah",
-        birthday:"Birth Date:",
-        id:"SMK Identity Number:",
-        idPlaceholder:"Example SMK12345",
-        note:"(Get from teacher)",
-        phone:"Phone Number:",
-        phonePlaceholder:"Enter phone number",
-        register:"Register"
-    }
+en:{
+title:"Account Registration",
+account:"Account:",
+accountPlaceholder:"Any account can be used",
+nickname:"Display Name:",
+nicknamePlaceholder:"Name shown in community",
+name:"Real Name:",
+namePlaceholder:"Enter your real name",
+class:"Class:",
+classPlaceholder:"Example 4 Amanah",
+birthday:"Birth Date:",
+phone:"Phone Number:",
+phonePlaceholder:"Enter phone number",
+register:"Register"
+}
 
 };
 
 function changeLanguage(lang){
 
-    document.getElementById("titleText").innerText =
-        translations[lang].title;
+document.getElementById("titleText").innerText = translations[lang].title;
 
-    document.getElementById("accountLabel").innerText =
-        translations[lang].account;
+document.getElementById("accountLabel").innerText = translations[lang].account;
+document.getElementById("accountInput").placeholder = translations[lang].accountPlaceholder;
 
-    document.getElementById("accountInput").placeholder =
-        translations[lang].accountPlaceholder;
+document.getElementById("nicknameLabel").innerText = translations[lang].nickname;
+document.getElementById("nicknameInput").placeholder = translations[lang].nicknamePlaceholder;
 
-    document.getElementById("nameLabel").innerText =
-        translations[lang].name;
+document.getElementById("nameLabel").innerText = translations[lang].name;
+document.getElementById("nameInput").placeholder = translations[lang].namePlaceholder;
 
-    document.getElementById("nameInput").placeholder =
-        translations[lang].namePlaceholder;
+document.getElementById("classLabel").innerText = translations[lang].class;
+document.getElementById("classInput").placeholder = translations[lang].classPlaceholder;
 
-    document.getElementById("classLabel").innerText =
-        translations[lang].class;
+document.getElementById("birthdayLabel").innerText = translations[lang].birthday;
 
-    document.getElementById("classInput").placeholder =
-        translations[lang].classPlaceholder;
+document.getElementById("phoneLabel").innerText = translations[lang].phone;
+document.getElementById("phoneInput").placeholder = translations[lang].phonePlaceholder;
 
-    document.getElementById("birthdayLabel").innerText =
-        translations[lang].birthday;
-
-    document.getElementById("idLabel").innerText =
-        translations[lang].id;
-
-    document.getElementById("idInput").placeholder =
-        translations[lang].idPlaceholder;
-
-    document.getElementById("idNote").innerText =
-        translations[lang].note;
-
-    document.getElementById("phoneLabel").innerText =
-        translations[lang].phone;
-
-    document.getElementById("phoneInput").placeholder =
-        translations[lang].phonePlaceholder;
-
-    document.getElementById("registerBtn").innerText =
-        translations[lang].register;
+document.getElementById("registerBtn").innerText = translations[lang].register;
 }
 
 </script>
