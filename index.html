@@ -1,196 +1,309 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMK Mantin - Welcome</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #0d0118;
-            --primary-purple: #7d3cf2;
-            --god-gold: #ffd700;
-            --cyan-text: #00e5ff;
-            --error-red: #ff4d4d;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMKmantin 注册</title>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans SC', sans-serif; }
-        body { background-color: var(--bg-color); color: white; overflow-x: hidden; }
+<style>
 
-        /* --- 界面切换逻辑 --- */
-        #login-page { display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; text-align: center; }
-        #chat-page { display: none; flex-direction: column; height: 100vh; max-width: 450px; margin: 0 auto; border: 1px solid #333; position: relative; }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
 
-        /* --- 登录页样式 (还原图1) --- */
-        .logo-header { width: 100%; display: flex; align-items: center; padding: 20px; gap: 10px; }
-        .s-box { background: var(--primary-purple); width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .hero-text { margin-top: 60px; }
-        .hero-text p { color: #888; font-size: 14px; margin-bottom: 20px; }
-        .hero-text h1 { font-size: 48px; font-weight: 800; line-height: 1.2; }
-        .highlight { background: linear-gradient(90deg, #8a2be2, #4b0082); padding: 5px 20px; border-radius: 4px; display: inline-block; margin-top: 10px; box-shadow: 0 0 20px rgba(138, 43, 226, 0.4); }
+body{
+    background:#f4f7fb;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
 
-        .red-notice { color: var(--error-red); font-weight: bold; font-size: 18px; margin: 40px 0; line-height: 1.6; }
-        
-        .btn-main { width: 220px; padding: 15px; border-radius: 30px; border: none; font-weight: bold; font-size: 16px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
-        .btn-purple { background: var(--primary-purple); color: white; }
-        .btn-dark { background: #111; color: white; border: 1px solid #333; }
+.container{
+    width:390px;
+    background:white;
+    border-radius:25px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    position:relative;
+}
 
-        /* --- 聊天室样式 (还原图2) --- */
-        #creatorHeader { background: var(--god-gold); color: black; text-align: center; font-size: 12px; padding: 5px; font-weight: bold; display: none; }
-        .chat-top { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .chat-list { flex: 1; padding: 15px; overflow-y: auto; }
-        .user-card { display: flex; align-items: center; background: #161616; margin-bottom: 12px; padding: 15px; border-radius: 15px; cursor: pointer; border: 1px solid #222; }
-        .avatar { width: 45px; height: 45px; background: #333; border-radius: 50%; margin-right: 15px; }
-        .god-effect { border: 2px solid var(--god-gold); box-shadow: 0 0 15px var(--god-gold); }
+.setting{
+    position:absolute;
+    top:15px;
+    right:15px;
+    font-size:22px;
+}
 
-        /* 导航栏 */
-        .nav-bar { display: grid; grid-template-columns: repeat(6, 1fr); background: #0a0a0a; padding: 12px 0; }
-        .nav-item { text-align: center; font-size: 10px; color: #555; }
-        .nav-item.active { color: var(--primary-purple); font-weight: bold; }
+.top-bar{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:10px;
+}
 
-        /* 管理面板 */
-        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; padding: 25px; border-radius: 20px; z-index: 100; width: 85%; border: 1px solid #333; }
-        .overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99; }
-    </style>
+.language-select{
+    padding:8px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    cursor:pointer;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo h1{
+    font-size:42px;
+    color:#111827;
+}
+
+.logo p{
+    color:#666;
+    margin-top:8px;
+    line-height:24px;
+}
+
+.input-group{
+    margin-bottom:16px;
+}
+
+.input-group label{
+    display:block;
+    margin-bottom:8px;
+    color:#333;
+    font-weight:bold;
+}
+
+.input-group input{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:15px;
+    background:#f1f1f1;
+    font-size:15px;
+}
+
+.note{
+    font-size:13px;
+    color:#777;
+    margin-top:5px;
+}
+
+.btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:15px;
+    background:#111827;
+    color:white;
+    font-size:18px;
+    margin-top:10px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn:hover{
+    background:#374151;
+}
+
+.footer{
+    margin-top:20px;
+    text-align:center;
+    color:#888;
+    font-size:13px;
+}
+
+</style>
 </head>
+
 <body>
 
-    <div id="login-page">
-        <div class="logo-header">
-            <div class="s-box">s</div>
-            <div style="font-weight: bold; font-size: 20px;">SMK <span style="color:var(--cyan-text)">mantin</span></div>
-        </div>
+<div class="container">
 
-        <div class="hero-text">
-            <p>● 校园生活，无限放大。</p>
-            <h1>你的校园。</h1>
-            <div class="highlight"><h1>你的故事。</h1></div>
-        </div>
+    <div class="setting">⚙️</div>
 
-        <div class="red-notice">
-            此页面不是SMK官方网站<br>
-            是学生自己弄的有什么<br>
-            不对的地方记得告诉我们
-        </div>
-
-        <button class="btn-main btn-purple">注册</button>
-        <button class="btn-main btn-dark" onclick="enterChat()">登录</button>
-
-        <div style="color:#555; font-size: 12px; margin-top: 50px;">Made with Replit</div>
+    <div class="top-bar">
+        <select class="language-select" onchange="changeLanguage(this.value)">
+            <option value="zh">中文</option>
+            <option value="ms">Bahasa Melayu</option>
+            <option value="ta">தமிழ்</option>
+            <option value="en">English</option>
+        </select>
     </div>
 
-    <div id="chat-page">
-        <div id="creatorHeader">MASTER CONTROL ACTIVATED</div>
-        <div class="chat-top">
-            <span style="font-weight: bold; color:var(--primary-purple); cursor: pointer;" onclick="checkMasterKey()">SMK <span style="color:var(--cyan-text)">mantin</span></span>
-            <select style="background:#222; color:white; border:none; border-radius:5px; padding:2px 8px;">
-                <option>中文</option>
-            </select>
-        </div>
+    <div class="logo">
+        <h1>SMKmantin</h1>
+        <p id="titleText">账号注册</p>
+    </div>
 
-        <div style="text-align: center; padding: 15px;">
-            <span style="border: 1px dashed #444; padding: 5px 20px; border-radius: 15px;">聊天室</span>
-        </div>
+    <div class="input-group">
+        <label id="accountLabel">账号:</label>
+        <input type="text" id="accountInput" placeholder="不用学校的都可以">
+    </div>
 
-        <div class="chat-list" id="userList">
-            </div>
+    <div class="input-group">
+        <label id="nameLabel">姓名:</label>
+        <input type="text" id="nameInput" placeholder="输入你的名字">
+    </div>
 
-        <nav class="nav-bar">
-            <div class="nav-item active">聊天室</div>
-            <div class="nav-item">学习区</div>
-            <div class="nav-item">视频</div>
-            <div class="nav-item">游戏</div>
-            <div class="nav-item">私/群</div>
-            <div class="nav-item">个人</div>
-        </nav>
+    <div class="input-group">
+        <label id="classLabel">班级:</label>
+        <input type="text" id="classInput" placeholder="例如 4 Amanah">
+    </div>
 
-        <div class="overlay" id="overlay" onclick="closeModal()"></div>
-        <div class="modal" id="adminModal">
-            <h3 id="targetName" style="text-align: center; margin-bottom: 20px;">用户管理</h3>
-            <button class="btn-main btn-dark" style="width: 100%;">🛡️ 监控私信记录</button>
-            <button id="toggleBtn" class="btn-main" style="width: 100%;" onclick="handleToggle()"></button>
-            <button class="btn-main" style="width: 100%; background: var(--error-red); color: white;" onclick="handleBan()">永久封禁</button>
-            <button class="btn-main btn-dark" style="width: 100%;" onclick="closeModal()">返回</button>
+    <div class="input-group">
+        <label id="birthdayLabel">生日日期:</label>
+        <input type="date" id="birthdayInput">
+    </div>
+
+    <div class="input-group">
+        <label id="idLabel">进入SMK的具体身份号码:</label>
+        <input type="text" id="idInput" placeholder="例如 SMK12345">
+        <div class="note" id="idNote">
+            （从老师那里获得）
         </div>
     </div>
 
-    <script>
-        const MY_KEY = "nzl122909";
-        let isMaster = false;
-        let selectedIdx = null;
+    <div class="input-group">
+        <label id="phoneLabel">电话号码:</label>
+        <input type="tel" id="phoneInput" placeholder="输入电话号码">
+    </div>
 
-        let users = [
-            { name: "超级管理员 (你)", isGod: true, id: "001" },
-            { name: "Student_Mantin_A", isGod: false, id: "882" },
-            { name: "Student_Mantin_B", isGod: false, id: "774" }
-        ];
+    <button class="btn" id="registerBtn">
+        注册
+    </button>
 
-        // 切换到聊天室
-        function enterChat() {
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('chat-page').style.display = 'flex';
-            render();
-        }
+    <div class="footer">
+        SMKmantin © 2026
+    </div>
 
-        // 渲染用户列表
-        function render() {
-            const list = document.getElementById('userList');
-            list.innerHTML = '';
-            users.forEach((u, i) => {
-                const card = document.createElement('div');
-                card.className = 'user-card';
-                card.onclick = () => openAdmin(i);
-                card.innerHTML = `
-                    <div class="avatar ${u.isGod ? 'god-effect' : ''}"></div>
-                    <div>
-                        <strong>${u.name}</strong> ${u.isGod ? '<span style="color:var(--god-gold); font-size:10px; margin-left:10px;">[神管理]</span>' : ''}
-                        <p style="font-size:12px; color:#555;">UID: ${u.id}</p>
-                    </div>
-                `;
-                list.appendChild(card);
-            });
-        }
+</div>
 
-        // 创世密码检查
-        function checkMasterKey() {
-            if(prompt("请输入创世密码：") === MY_KEY) {
-                isMaster = true;
-                document.getElementById('creatorHeader').style.display = 'block';
-                alert("身份验证成功，欢迎主人！");
-            }
-        }
+<script>
 
-        function openAdmin(i) {
-            if(!isMaster) return alert("普通用户无权操作。点击Logo输入密钥。");
-            selectedIdx = i;
-            const u = users[i];
-            document.getElementById('targetName').innerText = u.name;
-            const tBtn = document.getElementById('toggleBtn');
-            tBtn.innerText = u.isGod ? "取消神管理权限" : "赋予神管理权限";
-            tBtn.style.background = u.isGod ? "#ff8800" : "#00d4ff";
-            document.getElementById('adminModal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
+const translations = {
 
-        function handleToggle() {
-            users[selectedIdx].isGod = !users[selectedIdx].isGod;
-            render();
-            closeModal();
-        }
+    zh:{
+        title:"账号注册",
+        account:"账号:",
+        accountPlaceholder:"不用学校的都可以",
+        name:"姓名:",
+        namePlaceholder:"输入你的名字",
+        class:"班级:",
+        classPlaceholder:"例如 4 Amanah",
+        birthday:"生日日期:",
+        id:"进入SMK的具体身份号码:",
+        idPlaceholder:"例如 SMK12345",
+        note:"（从老师那里获得）",
+        phone:"电话号码:",
+        phonePlaceholder:"输入电话号码",
+        register:"注册"
+    },
 
-        function handleBan() {
-            if(confirm("确定封锁？")) {
-                users.splice(selectedIdx, 1);
-                render();
-                closeModal();
-            }
-        }
+    ms:{
+        title:"Pendaftaran Akaun",
+        account:"Akaun:",
+        accountPlaceholder:"Boleh guna akaun apa sahaja",
+        name:"Nama:",
+        namePlaceholder:"Masukkan nama anda",
+        class:"Kelas:",
+        classPlaceholder:"Contoh 4 Amanah",
+        birthday:"Tarikh Lahir:",
+        id:"Nombor identiti masuk SMK:",
+        idPlaceholder:"Contoh SMK12345",
+        note:"(Dapat daripada guru)",
+        phone:"Nombor Telefon:",
+        phonePlaceholder:"Masukkan nombor telefon",
+        register:"Daftar"
+    },
 
-        function closeModal() {
-            document.getElementById('adminModal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-    </script>
+    ta:{
+        title:"கணக்கு பதிவு",
+        account:"கணக்கு:",
+        accountPlaceholder:"எந்த கணக்கையும் பயன்படுத்தலாம்",
+        name:"பெயர்:",
+        namePlaceholder:"உங்கள் பெயரை உள்ளிடவும்",
+        class:"வகுப்பு:",
+        classPlaceholder:"உதாரணம் 4 Amanah",
+        birthday:"பிறந்த தேதி:",
+        id:"SMK அடையாள எண்:",
+        idPlaceholder:"உதாரணம் SMK12345",
+        note:"(ஆசிரியரிடமிருந்து பெறவும்)",
+        phone:"தொலைபேசி எண்:",
+        phonePlaceholder:"தொலைபேசி எண்ணை உள்ளிடவும்",
+        register:"பதிவு"
+    },
+
+    en:{
+        title:"Account Registration",
+        account:"Account:",
+        accountPlaceholder:"Any account can be used",
+        name:"Name:",
+        namePlaceholder:"Enter your name",
+        class:"Class:",
+        classPlaceholder:"Example 4 Amanah",
+        birthday:"Birth Date:",
+        id:"SMK Identity Number:",
+        idPlaceholder:"Example SMK12345",
+        note:"(Get from teacher)",
+        phone:"Phone Number:",
+        phonePlaceholder:"Enter phone number",
+        register:"Register"
+    }
+
+};
+
+function changeLanguage(lang){
+
+    document.getElementById("titleText").innerText =
+        translations[lang].title;
+
+    document.getElementById("accountLabel").innerText =
+        translations[lang].account;
+
+    document.getElementById("accountInput").placeholder =
+        translations[lang].accountPlaceholder;
+
+    document.getElementById("nameLabel").innerText =
+        translations[lang].name;
+
+    document.getElementById("nameInput").placeholder =
+        translations[lang].namePlaceholder;
+
+    document.getElementById("classLabel").innerText =
+        translations[lang].class;
+
+    document.getElementById("classInput").placeholder =
+        translations[lang].classPlaceholder;
+
+    document.getElementById("birthdayLabel").innerText =
+        translations[lang].birthday;
+
+    document.getElementById("idLabel").innerText =
+        translations[lang].id;
+
+    document.getElementById("idInput").placeholder =
+        translations[lang].idPlaceholder;
+
+    document.getElementById("idNote").innerText =
+        translations[lang].note;
+
+    document.getElementById("phoneLabel").innerText =
+        translations[lang].phone;
+
+    document.getElementById("phoneInput").placeholder =
+        translations[lang].phonePlaceholder;
+
+    document.getElementById("registerBtn").innerText =
+        translations[lang].register;
+}
+
+</script>
+
 </body>
 </html>
