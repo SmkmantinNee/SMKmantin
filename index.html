@@ -1,154 +1,167 @@
-import tkinter as tk
-from tkinter import messagebox
-import random
-import os
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼词王 - 四六级网页版 👑</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .score {
+            text-align: right;
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .scrambled-word {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+        .hint {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+            min-height: 24px;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            font-size: 18px;
+            text-align: center;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            outline: none;
+            margin-bottom: 20px;
+        }
+        input[type="text"]:focus {
+            border-color: #3498db;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        .btn-submit { background-color: #2ecc71; }
+        .btn-hint { background-color: #f1c40f; }
+        .btn-skip { background-color: #e74c3c; }
+    </style>
+</head>
+<body>
 
-# ==================== 1. 默认内置词库 ====================
-DEFAULT_BANK = [
-    {"word": "challenge", "hint": "n. 挑战 v. 向...挑战"},
-    {"word": "brilliant", "hint": "adj. 闪耀的，杰出的"},
-    {"word": "evaluate", "hint": "v. 评价，估计"}
-]
+<div class="game-container">
+    <div class="score" id="score-display">当前得分: 0</div>
+    <div class="scrambled-word" id="word-display">LOADING</div>
+    <div class="hint" id="hint-display">🔍 点击 [显示中文] 获取线索</div>
+    
+    <input type="text" id="user-input" placeholder="输入你的拼写" autocomplete="off">
+    
+    <div class="btn-group">
+        <button class="btn-submit" onclick="checkAnswer()">提交</button>
+        <button class="btn-hint" onclick="showHint()">显示中文</button>
+        <button class="btn-skip" onclick="nextQuestion()">跳过</button>
+    </div>
+</div>
 
-class CetWordGame:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("拼词王 - 四六级专版 👑")
-        self.root.geometry("460x400")
-        self.root.config(bg="#f4f6f9")
-        
-        # 居中显示窗口
-        self.center_window(460, 400)
-        
-        self.score = 0
-        self.word_bank = []
-        self.current_item = {}
-        self.scrambled_word = ""
-        
-        # 加载词库并初始化界面
-        self.load_words_from_file("cet_words.txt")
-        self.setup_ui()
-        
-        if self.word_bank:
-            self.next_question()
-        else:
-            messagebox.showerror("错误", "词库中没有有效单词，程序无法启动！")
+<script>
+    // 四六级核心词库
+    const WORD_BANK = [
+        {word: "challenge", hint: "n. 挑战 v. 向...挑战"},
+        {word: "brilliant", hint: "adj. 闪耀的，杰出的"},
+        {word: "evaluate", hint: "v. 评价，估计"},
+        {word: "abandon", hint: "v. 放弃，遗弃"},
+        {word: "academic", hint: "adj. 学校的，学术的"},
+        {word: "approach", hint: "n. 方法，途径 v. 接近"},
+        {word: "domestic", hint: "adj. 本国的，国内的；家用的"}
+    ];
 
-    def center_window(self, width, height):
-        """让游戏窗口在屏幕中央显示"""
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        x = (screen_width / 2) - (width / 2)
-        y = (screen_height / 2) - (height / 2)
-        self.root.geometry(f'{width}x{height}+{int(x)}+{int(y)}')
+    let score = 0;
+    let currentItem = {};
+    let scrambledWord = "";
 
-    # ==================== 2. 词库加载逻辑 ====================
-    def load_words_from_file(self, filename):
-        """从TXT文件读取词库"""
-        if not os.path.exists(filename):
-            try:
-                with open(filename, "w", encoding="utf-8") as f:
-                    f.write("abandon | v. 放弃，遗弃\n")
-                    f.write("academic | adj. 学校的，学术的\n")
-                    f.write("approach | n. 方法，途径 v. 接近\n")
-                    f.write("consequence | n. 结果，后果\n")
-                    f.write("domestic | adj. 本国的，国内的；家用的\n")
-                    f.write("frequent | adj. 常见的，频繁的\n")
-                    f.write("guarantee | v. 保证，担保 n. 保证书\n")
-                messagebox.showinfo("提示", f"已自动创建词库文件：{filename}")
-            except Exception as e:
-                print(f"创建词库文件失败: {e}")
-        
-        try:
-            with open(filename, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or "|" not in line:
-                        continue
-                    
-                    parts = line.split("|")
-                    word = parts[0].strip()
-                    hint = parts[1].strip()
-                    
-                    if word and hint:
-                        self.word_bank.append({"word": word, "hint": hint})
-                        
-            if not self.word_bank:
-                self.word_bank = DEFAULT_BANK
-        except Exception as e:
-            self.word_bank = DEFAULT_BANK
+    function scramble(word) {
+        let letters = word.split('');
+        while (true) {
+            for (let i = letters.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [letters[i], letters[j]] = [letters[j], letters[i]];
+            }
+            let result = letters.join('');
+            if (result !== word || word.length <= 1) {
+                return result;
+            }
+        }
+    }
 
-    # ==================== 3. UI 界面设计 ====================
-    def setup_ui(self):
-        """构建游戏界面"""
-        top_frame = tk.Frame(self.root, bg="#f4f6f9")
-        top_frame.pack(fill="x", padx=20, pady=10)
+    function nextQuestion() {
+        currentItem = WORD_BANK[Math.floor(Math.random() * WORD_BANK.length)];
+        scrambledWord = scramble(currentItem.word);
         
-        self.score_label = tk.Label(top_frame, text=f"当前得分: {self.score}", font=("Microsoft YaHei", 12, "bold"), bg="#f4f6f9", fg="#2c3e50")
-        self.score_label.pack(side="right")
-        
-        self.word_label = tk.Label(self.root, text="LOADING", font=("Arial", 36, "bold"), bg="#f4f6f9", fg="#2c3e50")
-        self.word_label.pack(pady=25)
-        
-        self.hint_label = tk.Label(self.root, text="点击[显示中文]获取提示", font=("Microsoft YaHei", 12, "italic"), bg="#f4f6f9", fg="#7f8c8d", wraplength=400)
-        self.hint_label.pack(pady=10)
-        
-        self.entry = tk.Entry(self.root, font=("Arial", 18), justify="center", bd=2, relief="solid", highlightthickness=1, highlightcolor="#3498db")
-        self.entry.pack(pady=15, ipady=6, ipadx=20)
-        self.entry.bind("<Return>", lambda event: self.check_answer())
-        
-        btn_frame = tk.Frame(self.root, bg="#f4f6f9")
-        btn_frame.pack(pady=15)
-        
-        self.submit_btn = tk.Button(btn_frame, text="提交 (Enter)", command=self.check_answer, bg="#2ecc71", fg="white", font=("Microsoft YaHei", 10, "bold"), width=11, height=1, relief="flat", cursor="hand2")
-        self.submit_btn.grid(row=0, column=0, padx=8)
-        
-        self.hint_btn = tk.Button(btn_frame, text="显示中文", command=self.show_hint, bg="#f1c40f", fg="white", font=("Microsoft YaHei", 10, "bold"), width=11, height=1, relief="flat", cursor="hand2")
-        self.hint_btn.grid(row=0, column=1, padx=8)
-        
-        self.skip_btn = tk.Button(btn_frame, text="跳过换一个", command=self.next_question, bg="#e74c3c", fg="white", font=("Microsoft YaHei", 10, "bold"), width=11, height=1, relief="flat", cursor="hand2")
-        self.skip_btn.grid(row=0, column=2, padx=8)
+        document.getElementById('word-display').innerText = scrambledWord.toUpperCase();
+        document.getElementById('hint-display').innerText = "🔍 点击 [显示中文] 获取线索";
+        document.getElementById('user-input').value = "";
+        document.getElementById('user-input').focus();
+    }
 
-    # ==================== 4. 游戏核心逻辑 ====================
-    def next_question(self):
-        """切换到下一个单词"""
-        self.current_item = random.choice(self.word_bank)
-        word = self.current_item["word"]
+    function checkAnswer() {
+        let input = document.getElementById('user-input').value.trim().toLowerCase();
+        let correct = currentItem.word.toLowerCase();
         
-        word_letters = list(word)
-        max_tries = 20
-        while max_tries > 0:
-            random.shuffle(word_letters)
-            self.scrambled_word = "".join(word_letters)
-            if self.scrambled_word != word or len(word) <= 1:
-                break
-            max_tries -= 1
-                
-        self.word_label.config(text=self.scrambled_word.upper())
-        self.hint_label.config(text="🔍 点击 [显示中文] 获取线索")
-        self.entry.delete(0, tk.END)
-        self.entry.focus()
+        if (input === correct) {
+            score += 10;
+            document.getElementById('score-display').innerText = "当前得分: " + score;
+            alert("好棒！🎉 回答正确！得分 +10\n\n💡 " + correct + " : " + currentItem.hint);
+            nextQuestion();
+        } else {
+            alert("拼错啦 ❌ 字母顺序不对，再观察一下吧！");
+        }
+    }
 
-    def check_answer(self):
-        """检查玩家输入的答案"""
-        user_input = self.entry.get().strip().lower()
-        correct_word = self.current_item["word"].lower()
-        
-        if user_input == correct_word:
-            self.score += 10
-            self.score_label.config(text=f"当前得分: {self.score}")
-            messagebox.showinfo("好棒！🎉", f"回答正确！得分 +10\n\n💡 {correct_word} : {self.current_item['hint']}")
-            self.next_question()
-        else:
-            messagebox.showerror("拼错啦 ❌", "字母顺序不对或者拼写错误，再观察一下吧！")
+    function showHint() {
+        document.getElementById('hint-display').innerText = "释义: " + currentItem.hint;
+    }
 
-    def show_hint(self):
-        """显示中文释义"""
-        self.hint_label.config(text=f"释义: {self.current_item['hint']}")
+    // 绑定输入框回车键
+    document.getElementById('user-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
+    });
 
-# ==================== 5. 程序入口 ====================
-if __name__ == "__main__":
-    root = tk.Tk()
-    game = CetWordGame(root)
-    root.mainloop()
-                
+    // 页面加载完成后启动游戏
+    window.onload = nextQuestion;
+</script>
+
+</body>
+</html>
+
