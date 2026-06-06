@@ -4,7 +4,6 @@ import random
 import os
 
 # ==================== 1. 默认内置词库 ====================
-# 当外部文件不存在且无法创建时，作为兜底备用
 DEFAULT_BANK = [
     {"word": "challenge", "hint": "n. 挑战 v. 向...挑战"},
     {"word": "brilliant", "hint": "adj. 闪耀的，杰出的"},
@@ -45,7 +44,7 @@ class CetWordGame:
 
     # ==================== 2. 词库加载逻辑 ====================
     def load_words_from_file(self, filename):
-        """从TXT文件读取词库，如果不存在则自动创建一个内置了四六级高频词的示例文件"""
+        """从TXT文件读取词库"""
         if not os.path.exists(filename):
             try:
                 with open(filename, "w", encoding="utf-8") as f:
@@ -56,7 +55,7 @@ class CetWordGame:
                     f.write("domestic | adj. 本国的，国内的；家用的\n")
                     f.write("frequent | adj. 常见的，频繁的\n")
                     f.write("guarantee | v. 保证，担保 n. 保证书\n")
-                messagebox.showinfo("提示", f"已在当前目录下为你自动创建四六级词库文件：{filename}\n你可以随时用记事本打开它来修改、添加单词！")
+                messagebox.showinfo("提示", f"已自动创建词库文件：{filename}")
             except Exception as e:
                 print(f"创建词库文件失败: {e}")
         
@@ -74,49 +73,39 @@ class CetWordGame:
                     if word and hint:
                         self.word_bank.append({"word": word, "hint": hint})
                         
-            if not self.word_bank: # 如果文件存在但是空的
+            if not self.word_bank:
                 self.word_bank = DEFAULT_BANK
         except Exception as e:
-            messagebox.showwarning("警告", f"读取词库失败，将使用内置默认词库。原因: {e}")
             self.word_bank = DEFAULT_BANK
 
     # ==================== 3. UI 界面设计 ====================
     def setup_ui(self):
-        """构建美观、大气的游戏界面"""
-        # 顶部栏（得分显示）
+        """构建游戏界面"""
         top_frame = tk.Frame(self.root, bg="#f4f6f9")
         top_frame.pack(fill="x", padx=20, pady=10)
         
         self.score_label = tk.Label(top_frame, text=f"当前得分: {self.score}", font=("Microsoft YaHei", 12, "bold"), bg="#f4f6f9", fg="#2c3e50")
         self.score_label.pack(side="right")
         
-        # 核心乱序单词显示
         self.word_label = tk.Label(self.root, text="LOADING", font=("Arial", 36, "bold"), bg="#f4f6f9", fg="#2c3e50")
         self.word_label.pack(pady=25)
         
-        # 中文提示区
         self.hint_label = tk.Label(self.root, text="点击[显示中文]获取提示", font=("Microsoft YaHei", 12, "italic"), bg="#f4f6f9", fg="#7f8c8d", wraplength=400)
         self.hint_label.pack(pady=10)
         
-        # 玩家输入框
         self.entry = tk.Entry(self.root, font=("Arial", 18), justify="center", bd=2, relief="solid", highlightthickness=1, highlightcolor="#3498db")
         self.entry.pack(pady=15, ipady=6, ipadx=20)
-        # 绑定回车键，敲回车直接提交
         self.entry.bind("<Return>", lambda event: self.check_answer())
         
-        # 按钮功能区
         btn_frame = tk.Frame(self.root, bg="#f4f6f9")
         btn_frame.pack(pady=15)
         
-        # 提交按钮
         self.submit_btn = tk.Button(btn_frame, text="提交 (Enter)", command=self.check_answer, bg="#2ecc71", fg="white", font=("Microsoft YaHei", 10, "bold"), width=11, height=1, relief="flat", cursor="hand2")
         self.submit_btn.grid(row=0, column=0, padx=8)
         
-        # 提示按钮
         self.hint_btn = tk.Button(btn_frame, text="显示中文", command=self.show_hint, bg="#f1c40f", fg="white", font=("Microsoft YaHei", 10, "bold"), width=11, height=1, relief="flat", cursor="hand2")
         self.hint_btn.grid(row=0, column=1, padx=8)
         
-        # 换题按钮
         self.skip_btn = tk.Button(btn_frame, text="跳过换一个", command=self.next_question, bg="#e74c3c", fg="white", font=("Microsoft YaHei", 10, "bold"), width=11, height=1, relief="flat", cursor="hand2")
         self.skip_btn.grid(row=0, column=2, padx=8)
 
@@ -126,22 +115,19 @@ class CetWordGame:
         self.current_item = random.choice(self.word_bank)
         word = self.current_item["word"]
         
-        # 洗牌算法打乱单词字母顺序
         word_letters = list(word)
-        max_tries = 20  # 防止死循环（比如单词只有1个字母）
+        max_tries = 20
         while max_tries > 0:
             random.shuffle(word_letters)
             self.scrambled_word = "".join(word_letters)
-            # 确保打乱后的词不和原词一样
             if self.scrambled_word != word or len(word) <= 1:
                 break
             max_tries -= 1
                 
-        # 更新界面元素
-        self.word_label.config(text=self.scrambled_word.upper()) # 大写显示更清晰
+        self.word_label.config(text=self.scrambled_word.upper())
         self.hint_label.config(text="🔍 点击 [显示中文] 获取线索")
         self.entry.delete(0, tk.END)
-        self.entry.focus() # 输入框自动获取焦点
+        self.entry.focus()
 
     def check_answer(self):
         """检查玩家输入的答案"""
@@ -165,5 +151,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     game = CetWordGame(root)
     root.mainloop()
-
                 
