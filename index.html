@@ -1,187 +1,93 @@
-<!DOCTYPE html><html lang="zh">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>拼词王 V2</title><style>
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:linear-gradient(135deg,#6dd5ed,#2193b0);
-}
+<!-- 游戏区域 --><h2>第1关</h2><p>找出7个常用字</p><div id="mainWord">田</div><div id="foundWords"></div><h3>请选择汉字</h3><div id="choices"><button onclick="pick('口')">口</button>
+<button onclick="pick('日')">日</button>
+<button onclick="pick('十')">十</button>
+<button onclick="pick('木')">木</button>
 
-.screen{
-    display:none;
-    min-height:100vh;
-    padding:20px;
-}
+<button onclick="pick('土')">土</button>
+<button onclick="pick('一')">一</button>
+<button onclick="pick('二')">二</button>
+<button onclick="pick('水')">水</button>
 
-.active{
-    display:block;
-}
+<button onclick="pick('火')">火</button>
+<button onclick="pick('山')">山</button>
+<button onclick="pick('月')">月</button>
+<button onclick="pick('人')">人</button>
 
-.card{
-    background:white;
-    border-radius:20px;
-    padding:20px;
-    max-width:500px;
-    margin:auto;
-    text-align:center;
-}
+</div><p id="msg"></p><script>
 
-.avatar{
-    font-size:60px;
-    margin:10px;
-    cursor:pointer;
-}
-
-button{
-    padding:12px 20px;
-    margin:5px;
-    border:none;
-    border-radius:12px;
-    background:#4CAF50;
-    color:white;
-    font-size:16px;
-}
-
-input{
-    width:90%;
-    padding:10px;
-    margin:5px;
-    border-radius:10px;
-}
-
-.wordBox{
-    font-size:80px;
-    margin:20px;
-}
-
-.found{
-    display:inline-block;
-    background:#4CAF50;
-    color:white;
-    padding:8px;
-    margin:4px;
-    border-radius:8px;
-}
-</style></head><body><!-- 登录 --><div id="login" class="screen active">
-<div class="card"><h1>拼词王</h1><input id="username" placeholder="用户名"><h3>选择头像</h3><div>
-<span class="avatar" onclick="selectAvatar('😀')">😀</span>
-<span class="avatar" onclick="selectAvatar('😎')">😎</span>
-<span class="avatar" onclick="selectAvatar('🤖')">🤖</span>
-<span class="avatar" onclick="selectAvatar('🐱')">🐱</span>
-<span class="avatar" onclick="selectAvatar('🐼')">🐼</span>
-<span class="avatar" onclick="selectAvatar('🦊')">🦊</span>
-</div><button onclick="register()">进入游戏</button>
-
-</div>
-</div><!-- 大厅 --><div id="lobby" class="screen"><div class="card"><h1>🏠 游戏大厅</h1><div id="playerAvatar" style="font-size:70px;"></div><h2 id="playerName"></h2><p>🪙 金币：<span id="coins">100</span></p><p>💡 提示卡：<span id="hints">0</span></p><p>🏆 当前关卡：<span id="level">1</span></p><button onclick="startGame()">▶ 开始游戏</button>
-
-</div></div><!-- 游戏 --><div id="game" class="screen"><div class="card"><h2>第1关</h2><p>找出下面汉字中的隐藏字</p><div class="wordBox">田</div><input id="answer" placeholder="输入找到的字"><button onclick="submitWord()">提交</button>
-
-<h3>已找到：</h3><div id="foundList"></div></div></div><script>
-
-let avatar="😀";
-
-const level1={
-    main:"田",
-    answers:["田","口","日","十","土","一","二"]
-};
+const answers=[
+"田",
+"口",
+"日",
+"十",
+"土",
+"一",
+"二"
+];
 
 let found=[];
 
-function selectAvatar(a){
-    avatar=a;
+function pick(word){
+
+if(found.includes(word)){
+return;
 }
 
-function register(){
+if(answers.includes(word)){
 
-    let name=document.getElementById("username").value;
+found.push(word);
 
-    if(!name){
-        alert("请输入用户名");
-        return;
-    }
+document.getElementById("foundWords")
+.innerHTML +=
+"<span style='background:green;color:white;padding:8px;margin:5px;border-radius:10px;'>"+word+"</span>";
 
-    let player={
-        name:name,
-        avatar:avatar,
-        coins:100,
-        hints:0,
-        level:1
-    };
+document.getElementById("msg")
+.innerHTML="✅ 找到了："+word;
 
-    localStorage.setItem(
-        "pcw_player",
-        JSON.stringify(player)
-    );
+if(found.length===answers.length){
 
-    loadLobby();
+document.getElementById("msg")
+.innerHTML=
+"🎉 过关成功！获得50金币";
+
 }
 
-function loadLobby(){
+}else{
 
-    let player=
-    JSON.parse(localStorage.getItem("pcw_player"));
+document.getElementById("msg")
+.innerHTML=
+"❌ 不是答案";
 
-    document.getElementById("login").classList.remove("active");
-    document.getElementById("lobby").classList.add("active");
-
-    document.getElementById("playerAvatar").innerHTML=player.avatar;
-    document.getElementById("playerName").innerHTML=player.name;
-    document.getElementById("coins").innerHTML=player.coins;
-    document.getElementById("hints").innerHTML=player.hints;
-    document.getElementById("level").innerHTML=player.level;
 }
 
-function startGame(){
-
-    document.getElementById("lobby").classList.remove("active");
-    document.getElementById("game").classList.add("active");
 }
 
-function submitWord(){
+</script><style>
 
-    let word=
-    document.getElementById("answer").value.trim();
-
-    if(level1.answers.includes(word)
-       && !found.includes(word)){
-
-        found.push(word);
-
-        let div=document.createElement("div");
-        div.className="found";
-        div.innerText=word;
-
-        document.getElementById("foundList")
-        .appendChild(div);
-
-        document.getElementById("answer").value="";
-
-        if(found.length===level1.answers.length){
-
-            let player=
-            JSON.parse(localStorage.getItem("pcw_player"));
-
-            player.coins+=50;
-
-            localStorage.setItem(
-                "pcw_player",
-                JSON.stringify(player)
-            );
-
-            alert("过关！获得50金币！");
-        }
-
-    }else{
-        alert("字不存在或已找到");
-    }
+body{
+text-align:center;
+font-family:Arial;
+background:#87CEEB;
 }
 
-if(localStorage.getItem("pcw_player")){
-    loadLobby();
+#mainWord{
+font-size:100px;
+font-weight:bold;
+margin:20px;
 }
 
-</script></body>
-</html>
+button{
+width:70px;
+height:70px;
+margin:5px;
+font-size:28px;
+border:none;
+border-radius:15px;
+background:#FFD54F;
+}
+
+#foundWords{
+margin:20px;
+}
+
+</style>
