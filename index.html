@@ -1,171 +1,187 @@
-<!DOCTYPE html>
-<html lang="zh">
+<!DOCTYPE html><html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>拼词王</title>
-
-<style>
+<title>拼词王 V2</title><style>
 body{
-font-family:Arial;
-background:#4CAF50;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#6dd5ed,#2193b0);
 }
 
-.box{
-background:white;
-padding:20px;
-border-radius:15px;
-width:90%;
-max-width:400px;
-text-align:center;
+.screen{
+    display:none;
+    min-height:100vh;
+    padding:20px;
 }
 
-input{
-width:90%;
-padding:10px;
-margin:5px 0;
+.active{
+    display:block;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    max-width:500px;
+    margin:auto;
+    text-align:center;
+}
+
+.avatar{
+    font-size:60px;
+    margin:10px;
+    cursor:pointer;
 }
 
 button{
-padding:10px 20px;
-margin:5px;
-background:#4CAF50;
-color:white;
-border:none;
-border-radius:8px;
+    padding:12px 20px;
+    margin:5px;
+    border:none;
+    border-radius:12px;
+    background:#4CAF50;
+    color:white;
+    font-size:16px;
 }
 
-.hidden{
-display:none;
-}
-</style>
-</head>
-
-<body>
-
-<!-- 登录 -->
-<div class="box" id="loginPage">
-
-<h2>拼词王</h2>
-
-<input id="loginUser" placeholder="用户名">
-
-<input id="loginPass" type="password" placeholder="密码">
-
-<br>
-
-<button onclick="login()">登录</button>
-
-<button onclick="showRegister()">注册</button>
-
-<p id="loginMsg"></p>
-
-</div>
-
-<!-- 注册 -->
-<div class="box hidden" id="registerPage">
-
-<h2>注册账号</h2>
-
-<input id="regUser" placeholder="用户名">
-
-<input id="regPass" type="password" placeholder="密码">
-
-<br>
-
-<button onclick="register()">注册</button>
-
-<button onclick="showLogin()">返回</button>
-
-<p id="regMsg"></p>
-
-</div>
-
-<!-- 大厅 -->
-<div class="box hidden" id="lobby">
-
-<h2>🏠 游戏大厅</h2>
-
-<p id="playerName"></p>
-
-<p>🪙 金币：100</p>
-
-<p>💡 提示卡：0</p>
-
-<p>🏆 当前关卡：1</p>
-
-<button>开始游戏</button>
-
-</div>
-
-<script>
-
-function showRegister(){
-document.getElementById("loginPage").classList.add("hidden");
-document.getElementById("registerPage").classList.remove("hidden");
+input{
+    width:90%;
+    padding:10px;
+    margin:5px;
+    border-radius:10px;
 }
 
-function showLogin(){
-document.getElementById("registerPage").classList.add("hidden");
-document.getElementById("loginPage").classList.remove("hidden");
+.wordBox{
+    font-size:80px;
+    margin:20px;
+}
+
+.found{
+    display:inline-block;
+    background:#4CAF50;
+    color:white;
+    padding:8px;
+    margin:4px;
+    border-radius:8px;
+}
+</style></head><body><!-- 登录 --><div id="login" class="screen active">
+<div class="card"><h1>拼词王</h1><input id="username" placeholder="用户名"><h3>选择头像</h3><div>
+<span class="avatar" onclick="selectAvatar('😀')">😀</span>
+<span class="avatar" onclick="selectAvatar('😎')">😎</span>
+<span class="avatar" onclick="selectAvatar('🤖')">🤖</span>
+<span class="avatar" onclick="selectAvatar('🐱')">🐱</span>
+<span class="avatar" onclick="selectAvatar('🐼')">🐼</span>
+<span class="avatar" onclick="selectAvatar('🦊')">🦊</span>
+</div><button onclick="register()">进入游戏</button>
+
+</div>
+</div><!-- 大厅 --><div id="lobby" class="screen"><div class="card"><h1>🏠 游戏大厅</h1><div id="playerAvatar" style="font-size:70px;"></div><h2 id="playerName"></h2><p>🪙 金币：<span id="coins">100</span></p><p>💡 提示卡：<span id="hints">0</span></p><p>🏆 当前关卡：<span id="level">1</span></p><button onclick="startGame()">▶ 开始游戏</button>
+
+</div></div><!-- 游戏 --><div id="game" class="screen"><div class="card"><h2>第1关</h2><p>找出下面汉字中的隐藏字</p><div class="wordBox">田</div><input id="answer" placeholder="输入找到的字"><button onclick="submitWord()">提交</button>
+
+<h3>已找到：</h3><div id="foundList"></div></div></div><script>
+
+let avatar="😀";
+
+const level1={
+    main:"田",
+    answers:["田","口","日","十","土","一","二"]
+};
+
+let found=[];
+
+function selectAvatar(a){
+    avatar=a;
 }
 
 function register(){
 
-let user=document.getElementById("regUser").value;
-let pass=document.getElementById("regPass").value;
+    let name=document.getElementById("username").value;
 
-if(user===""||pass===""){
-document.getElementById("regMsg").innerHTML="请填写完整";
-return;
+    if(!name){
+        alert("请输入用户名");
+        return;
+    }
+
+    let player={
+        name:name,
+        avatar:avatar,
+        coins:100,
+        hints:0,
+        level:1
+    };
+
+    localStorage.setItem(
+        "pcw_player",
+        JSON.stringify(player)
+    );
+
+    loadLobby();
 }
 
-localStorage.setItem(
-"user_"+user,
-JSON.stringify({
-username:user,
-password:pass,
-coins:100,
-hints:0,
-level:1
-})
-);
+function loadLobby(){
 
-document.getElementById("regMsg").innerHTML="注册成功！";
+    let player=
+    JSON.parse(localStorage.getItem("pcw_player"));
+
+    document.getElementById("login").classList.remove("active");
+    document.getElementById("lobby").classList.add("active");
+
+    document.getElementById("playerAvatar").innerHTML=player.avatar;
+    document.getElementById("playerName").innerHTML=player.name;
+    document.getElementById("coins").innerHTML=player.coins;
+    document.getElementById("hints").innerHTML=player.hints;
+    document.getElementById("level").innerHTML=player.level;
 }
 
-function login(){
+function startGame(){
 
-let user=document.getElementById("loginUser").value;
-let pass=document.getElementById("loginPass").value;
-
-let data=localStorage.getItem("user_"+user);
-
-if(!data){
-document.getElementById("loginMsg").innerHTML="账号不存在";
-return;
+    document.getElementById("lobby").classList.remove("active");
+    document.getElementById("game").classList.add("active");
 }
 
-data=JSON.parse(data);
+function submitWord(){
 
-if(data.password!==pass){
-document.getElementById("loginMsg").innerHTML="密码错误";
-return;
+    let word=
+    document.getElementById("answer").value.trim();
+
+    if(level1.answers.includes(word)
+       && !found.includes(word)){
+
+        found.push(word);
+
+        let div=document.createElement("div");
+        div.className="found";
+        div.innerText=word;
+
+        document.getElementById("foundList")
+        .appendChild(div);
+
+        document.getElementById("answer").value="";
+
+        if(found.length===level1.answers.length){
+
+            let player=
+            JSON.parse(localStorage.getItem("pcw_player"));
+
+            player.coins+=50;
+
+            localStorage.setItem(
+                "pcw_player",
+                JSON.stringify(player)
+            );
+
+            alert("过关！获得50金币！");
+        }
+
+    }else{
+        alert("字不存在或已找到");
+    }
 }
 
-document.getElementById("loginPage").classList.add("hidden");
-document.getElementById("lobby").classList.remove("hidden");
-
-document.getElementById("playerName").innerHTML=
-"👤 玩家："+data.username;
+if(localStorage.getItem("pcw_player")){
+    loadLobby();
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
