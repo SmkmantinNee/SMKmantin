@@ -1,167 +1,171 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>拼词王 - 四六级网页版 👑</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .game-container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-        .score {
-            text-align: right;
-            color: #2c3e50;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .scrambled-word {
-            font-size: 36px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin: 20px 0;
-            letter-spacing: 2px;
-        }
-        .hint {
-            color: #7f8c8d;
-            font-style: italic;
-            margin-bottom: 20px;
-            min-height: 24px;
-        }
-        input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            font-size: 18px;
-            text-align: center;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            outline: none;
-            margin-bottom: 20px;
-        }
-        input[type="text"]:focus {
-            border-color: #3498db;
-        }
-        .btn-group {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        button {
-            flex: 1;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            color: white;
-            transition: opacity 0.2s;
-        }
-        button:hover { opacity: 0.9; }
-        .btn-submit { background-color: #2ecc71; }
-        .btn-hint { background-color: #f1c40f; }
-        .btn-skip { background-color: #e74c3c; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拼词王</title>
+
+<style>
+body{
+font-family:Arial;
+background:#4CAF50;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.box{
+background:white;
+padding:20px;
+border-radius:15px;
+width:90%;
+max-width:400px;
+text-align:center;
+}
+
+input{
+width:90%;
+padding:10px;
+margin:5px 0;
+}
+
+button{
+padding:10px 20px;
+margin:5px;
+background:#4CAF50;
+color:white;
+border:none;
+border-radius:8px;
+}
+
+.hidden{
+display:none;
+}
+</style>
 </head>
+
 <body>
 
-<div class="game-container">
-    <div class="score" id="score-display">当前得分: 0</div>
-    <div class="scrambled-word" id="word-display">LOADING</div>
-    <div class="hint" id="hint-display">🔍 点击 [显示中文] 获取线索</div>
-    
-    <input type="text" id="user-input" placeholder="输入你的拼写" autocomplete="off">
-    
-    <div class="btn-group">
-        <button class="btn-submit" onclick="checkAnswer()">提交</button>
-        <button class="btn-hint" onclick="showHint()">显示中文</button>
-        <button class="btn-skip" onclick="nextQuestion()">跳过</button>
-    </div>
+<!-- 登录 -->
+<div class="box" id="loginPage">
+
+<h2>拼词王</h2>
+
+<input id="loginUser" placeholder="用户名">
+
+<input id="loginPass" type="password" placeholder="密码">
+
+<br>
+
+<button onclick="login()">登录</button>
+
+<button onclick="showRegister()">注册</button>
+
+<p id="loginMsg"></p>
+
+</div>
+
+<!-- 注册 -->
+<div class="box hidden" id="registerPage">
+
+<h2>注册账号</h2>
+
+<input id="regUser" placeholder="用户名">
+
+<input id="regPass" type="password" placeholder="密码">
+
+<br>
+
+<button onclick="register()">注册</button>
+
+<button onclick="showLogin()">返回</button>
+
+<p id="regMsg"></p>
+
+</div>
+
+<!-- 大厅 -->
+<div class="box hidden" id="lobby">
+
+<h2>🏠 游戏大厅</h2>
+
+<p id="playerName"></p>
+
+<p>🪙 金币：100</p>
+
+<p>💡 提示卡：0</p>
+
+<p>🏆 当前关卡：1</p>
+
+<button>开始游戏</button>
+
 </div>
 
 <script>
-    // 四六级核心词库
-    const WORD_BANK = [
-        {word: "challenge", hint: "n. 挑战 v. 向...挑战"},
-        {word: "brilliant", hint: "adj. 闪耀的，杰出的"},
-        {word: "evaluate", hint: "v. 评价，估计"},
-        {word: "abandon", hint: "v. 放弃，遗弃"},
-        {word: "academic", hint: "adj. 学校的，学术的"},
-        {word: "approach", hint: "n. 方法，途径 v. 接近"},
-        {word: "domestic", hint: "adj. 本国的，国内的；家用的"}
-    ];
 
-    let score = 0;
-    let currentItem = {};
-    let scrambledWord = "";
+function showRegister(){
+document.getElementById("loginPage").classList.add("hidden");
+document.getElementById("registerPage").classList.remove("hidden");
+}
 
-    function scramble(word) {
-        let letters = word.split('');
-        while (true) {
-            for (let i = letters.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [letters[i], letters[j]] = [letters[j], letters[i]];
-            }
-            let result = letters.join('');
-            if (result !== word || word.length <= 1) {
-                return result;
-            }
-        }
-    }
+function showLogin(){
+document.getElementById("registerPage").classList.add("hidden");
+document.getElementById("loginPage").classList.remove("hidden");
+}
 
-    function nextQuestion() {
-        currentItem = WORD_BANK[Math.floor(Math.random() * WORD_BANK.length)];
-        scrambledWord = scramble(currentItem.word);
-        
-        document.getElementById('word-display').innerText = scrambledWord.toUpperCase();
-        document.getElementById('hint-display').innerText = "🔍 点击 [显示中文] 获取线索";
-        document.getElementById('user-input').value = "";
-        document.getElementById('user-input').focus();
-    }
+function register(){
 
-    function checkAnswer() {
-        let input = document.getElementById('user-input').value.trim().toLowerCase();
-        let correct = currentItem.word.toLowerCase();
-        
-        if (input === correct) {
-            score += 10;
-            document.getElementById('score-display').innerText = "当前得分: " + score;
-            alert("好棒！🎉 回答正确！得分 +10\n\n💡 " + correct + " : " + currentItem.hint);
-            nextQuestion();
-        } else {
-            alert("拼错啦 ❌ 字母顺序不对，再观察一下吧！");
-        }
-    }
+let user=document.getElementById("regUser").value;
+let pass=document.getElementById("regPass").value;
 
-    function showHint() {
-        document.getElementById('hint-display').innerText = "释义: " + currentItem.hint;
-    }
+if(user===""||pass===""){
+document.getElementById("regMsg").innerHTML="请填写完整";
+return;
+}
 
-    // 绑定输入框回车键
-    document.getElementById('user-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            checkAnswer();
-        }
-    });
+localStorage.setItem(
+"user_"+user,
+JSON.stringify({
+username:user,
+password:pass,
+coins:100,
+hints:0,
+level:1
+})
+);
 
-    // 页面加载完成后启动游戏
-    window.onload = nextQuestion;
+document.getElementById("regMsg").innerHTML="注册成功！";
+}
+
+function login(){
+
+let user=document.getElementById("loginUser").value;
+let pass=document.getElementById("loginPass").value;
+
+let data=localStorage.getItem("user_"+user);
+
+if(!data){
+document.getElementById("loginMsg").innerHTML="账号不存在";
+return;
+}
+
+data=JSON.parse(data);
+
+if(data.password!==pass){
+document.getElementById("loginMsg").innerHTML="密码错误";
+return;
+}
+
+document.getElementById("loginPage").classList.add("hidden");
+document.getElementById("lobby").classList.remove("hidden");
+
+document.getElementById("playerName").innerHTML=
+"👤 玩家："+data.username;
+}
+
 </script>
 
 </body>
 </html>
-
